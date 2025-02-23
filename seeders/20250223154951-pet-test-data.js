@@ -8,7 +8,8 @@ module.exports = {
       clientid: 1,
       name: 'Нэш',
       age: 6,
-      breed: 'Лабрадор'
+      breed: 'Лабрадор',
+      medicalhistory: "test"
     }], {})
   },
 

@@ -1,8 +1,11 @@
-const User = require('../models/user');
-const JWT_SECRET = process.env.JWT_SECRET
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
+
+const User = require('../models/user');
+
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET
+
 
 exports.getUsers = async (req, res) => {
     try {
@@ -19,9 +22,8 @@ exports.register = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password, email, role } = req.body;
-
     try {
+        const { username, password, email, role } = req.body;
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser) {
             return res.status(400).json({ message: 'Username already exists' });
@@ -51,7 +53,13 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { username, password } = req.body;
+
     try {
         const user = await User.findOne({ where: { username } });
         if (!user) {
@@ -63,7 +71,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
-        const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
 
         return res.json({ token });
     } catch (error) {

@@ -1,4 +1,4 @@
-const { Sequelize } = require("../models");
+const { Sequelize, sequelize } = require("../models");
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -29,6 +29,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      medicalhistory: {
+        type: Sequelize.TEXT,
+      }
     });
   },
 

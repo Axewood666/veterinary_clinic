@@ -31,6 +31,9 @@ Pet.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    medicalhistory: {
+        type: DataTypes.TEXT,
+    },
 }, {
     sequelize,
     modelName: 'pet',

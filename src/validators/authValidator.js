@@ -11,7 +11,7 @@ const registerValidationRules = () => {
 
 const loginValidationRules = () => {
     return [
-        body('email').isEmail().withMessage('Invalid email address'),
+        body('username').exists().withMessage('Invalid email address'),
         body('password').exists().withMessage('Password is required')
     ];
 };
