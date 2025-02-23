@@ -1,4 +1,3 @@
-
 const { body } = require('express-validator');
 
 const registerValidationRules = () => {
@@ -10,7 +9,15 @@ const registerValidationRules = () => {
     ];
 };
 
+const loginValidationRules = () => {
+    return [
+        body('email').isEmail().withMessage('Invalid email address'),
+        body('password').exists().withMessage('Password is required')
+    ];
+};
+
 module.exports = {
     registerValidationRules,
+    loginValidationRules,
 };
 
