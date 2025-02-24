@@ -1,7 +1,7 @@
-const Client = require('../models/client');
+const { Client } = require('../models/');
 const { validationResult } = require('express-validator');
 
-exports.getClients = async (req, res) => {
+exports.getClients = async(req, res) => {
     try {
         const clients = await Client.findAll();
         res.status(200).json(clients);
@@ -10,7 +10,7 @@ exports.getClients = async (req, res) => {
     }
 }
 
-exports.getClient = async (req, res) => {
+exports.getClient = async(req, res) => {
     try {
         const clientid = req.params.id;
         const clients = await Client.findOne({ where: { clientid: clientid } });
@@ -20,7 +20,7 @@ exports.getClient = async (req, res) => {
     }
 }
 
-exports.updateClient = async (req, res) => {
+exports.updateClient = async(req, res) => {
     try {
         const clientId = req.params.id;
         const updates = req.body;

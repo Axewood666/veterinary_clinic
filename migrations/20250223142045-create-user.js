@@ -1,36 +1,35 @@
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('users', {
-      userd: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      username: {
-        type: Sequelize.STRING,
-        unique: true,
-        allowNull: false,
-      },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: Sequelize.ENUM('Administrator', 'Veterinarian', 'Client'),
-        allowNull: false,
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      phoneNumber: {
-        type: Sequelize.STRING,
-      },
-    });
-  },
+    up: async(queryInterface, Sequelize) => {
+        await queryInterface.createTable('users', {
+            userid: {
+                type: Sequelize.INTEGER,
+                primaryKey: true,
+                autoIncrement: true,
+            },
+            username: {
+                type: Sequelize.STRING,
+                unique: true,
+                allowNull: false,
+            },
+            password: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            role: {
+                type: Sequelize.ENUM('Administrator', 'Veterinarian', 'Client'),
+                allowNull: false,
+            },
+            email: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            phoneNumber: {
+                type: Sequelize.STRING,
+            },
+        });
+    },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('users');
-  }
+    down: async(queryInterface, Sequelize) => {
+        await queryInterface.dropTable('users');
+    }
 };
-

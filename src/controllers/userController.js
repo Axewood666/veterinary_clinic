@@ -1,13 +1,13 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 
-const User = require('../models/user');
+const { User } = require('../models/');
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
 
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async(req, res) => {
     try {
         const users = await User.findAll();
         res.status(200).json(users);
@@ -16,7 +16,7 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-exports.register = async (req, res) => {
+exports.register = async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
     }
 };
 
-exports.login = async (req, res) => {
+exports.login = async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -79,4 +79,3 @@ exports.login = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
-

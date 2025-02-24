@@ -2,7 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Client = require('./client');
 
-class Pet extends Model { }
+class Pet extends Model {}
 
 Pet.init({
     petid: {
@@ -14,7 +14,7 @@ Pet.init({
         type: DataTypes.INTEGER,
         references: {
             model: Client,
-            key: 'clientId',
+            key: 'clientid',
         },
         allowNull: false,
     },
