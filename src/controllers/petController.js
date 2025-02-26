@@ -1,5 +1,6 @@
-const { Client, Pet } = require('../models/');
+const { User, Pet } = require('../models/');
 const { validationResult } = require('express-validator');
+const _ = require('lodash');
 
 exports.addPet = async(req, res) => {
     const errors = validationResult(req);
@@ -11,16 +12,16 @@ exports.addPet = async(req, res) => {
         const petData = req.body;
         const user = req.user;
 
-        if (user.role === 'user' && user.clientId !== clientId) {
+        if (user.role === 'Client' && user.userid !== clientId) {
             return res.status(403).json({ message: 'You are not allowed to add a pet to this client' });
         }
 
-        const client = await Client.findByPk(clientId);
-        if (!client) {
+        const client = await User.findByPk(clientId);
+        if (_.isEmpty(client)) {
             return res.status(404).json({ message: 'Client not found' });
         }
 
-        let newPet = await Pet.create({...petData, clientid: clientId });
+        let newPet = await Pet.create({...petData, userid: clientId });
 
         res.status(201).json(newPet);
     } catch (error) {
@@ -33,38 +34,38 @@ exports.getClientPets = async(req, res) => {
     try {
         const clientId = req.params.clientId;
         const user = req.user;
-
-        if (user.role === 'user' && user.clientId !== clientId) {
-            return res.status(403).json({ message: 'You are not allowed to receive this clients pets' });
+        if (user.role === 'Client' && user.userid !== clientId) {
+            return res.status(403).json({ message: 'You are not allowed to receive this client\'s pets' });
         }
-
-        const client = await Client.findByPk(clientId);
-        if (!client) {
+        const client = await User.findByPk(clientId);
+        if (_.isEmpty(client)) {
             return res.status(404).json({ message: 'Client not found' });
         }
-
-        const attributes = ['clientid', 'petid', 'name', 'age', 'breed', 'medicalhistory'];
+        const attributes = ['userid', 'petid', 'name', 'type', 'gender', 'age', 'breed', 'medicalhistory'];
         const pets = await Pet.findAll({
             attributes: attributes,
+            where: { userid: clientId },
             include: [{
-                model: Client,
+                model: User,
                 attributes: ['name']
             }]
         });
-
+        if (_.isEmpty(pets)) {
+            res.status(404).json({ error: "You don't have any pets" });
+            return;
+        }
         let response = {
-            clients: [{
-                name: pets[0].client.name,
-                clientid: pets[0].clientid,
-                pets: pets.map(pet => ({
-                    petid: pet.petid,
-                    name: pet.name,
-                    age: pet.age,
-                    breed: pet.breed,
-                    medicalhistory: pet.medicalhistory
-                }))
-            }]
-
+            name: pets[0].user.name,
+            clientid: pets[0].clientid,
+            pets: pets.map(pet => ({
+                petid: pet.petid,
+                name: pet.name,
+                type: pet.type,
+                gender: pet.gender,
+                age: pet.age,
+                breed: pet.breed,
+                medicalhistory: pet.medicalhistory
+            }))
         }
         res.status(201).json(response);
     } catch (error) {
@@ -76,27 +77,34 @@ exports.getClientPets = async(req, res) => {
 
 exports.getAllPets = async(req, res) => {
     try {
-        const attributes = ['clientid', 'petid', 'name', 'age', 'breed', 'medicalhistory'];
+        const attributes = ['userid', 'petid', 'name', 'type', 'gender', 'age', 'breed', 'medicalhistory'];
         const pets = await Pet.findAll({
             attributes: attributes,
             include: [{
-                model: Client,
+                model: User,
                 attributes: ['name']
             }]
         });
+
+        if (_.isEmpty(pets)) {
+            res.status(404).json({ error: "No pets" });
+            return;
+        }
 
         let response = {
             "clients": []
         };
 
         const groupedByClient = pets.reduce((acc, pet) => {
-            const key = pet.clientid;
+            const key = pet.userid;
             if (!acc[key]) {
-                acc[key] = { name: pet.client.name, clientid: key, pets: [] };
+                acc[key] = { name: pet.user.name, clientid: key, pets: [] };
             }
             acc[key].pets.push({
                 petid: pet.petid,
                 name: pet.name,
+                type: pet.type,
+                gender: pet.gender,
                 age: pet.age,
                 breed: pet.breed,
                 medicalhistory: pet.medicalhistory

@@ -25,7 +25,7 @@ User.init({
         },
     },
     role: {
-        type: DataTypes.ENUM('Administrator', 'Veterinarian', 'Client'),
+        type: DataTypes.ENUM('Admin', 'Vet', 'Client'),
         allowNull: false,
     },
     email: {
@@ -35,6 +35,9 @@ User.init({
     phoneNumber: {
         type: DataTypes.STRING,
     },
+    name: {
+        type: DataTypes.STRING,
+    }
 }, {
     sequelize,
     modelName: 'user',

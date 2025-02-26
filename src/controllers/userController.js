@@ -42,7 +42,6 @@ exports.register = async(req, res) => {
         });
 
         res.status(201).json({
-            id: newUser.id,
             username: newUser.username,
             email: newUser.email,
             role: newUser.role,
@@ -71,7 +70,7 @@ exports.login = async(req, res) => {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
-        const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, JWT_SECRET, { expiresIn: '12h' });
 
         return res.json({ token });
     } catch (error) {

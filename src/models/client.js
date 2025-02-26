@@ -2,7 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./user');
 
-class Client extends Model { }
+class Client extends Model {}
 
 Client.init({
     clientid: {
@@ -33,7 +33,7 @@ Client.init({
     },
 }, {
     sequelize,
-    modelName: 'client',
+    modelName: 'Client',
     tableName: 'clients',
     timestamps: false,
 });

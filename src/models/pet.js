@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Client = require('./client');
+const User = require('./user');
 
 class Pet extends Model {}
 
@@ -10,11 +10,11 @@ Pet.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    clientid: {
+    userid: {
         type: DataTypes.INTEGER,
         references: {
-            model: Client,
-            key: 'clientid',
+            model: User,
+            key: 'userid',
         },
         allowNull: false,
     },
@@ -33,6 +33,14 @@ Pet.init({
     },
     medicalhistory: {
         type: DataTypes.TEXT,
+    },
+    type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
 }, {
     sequelize,

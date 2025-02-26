@@ -16,7 +16,7 @@ module.exports = {
                 allowNull: false,
             },
             role: {
-                type: Sequelize.ENUM('Administrator', 'Veterinarian', 'Client'),
+                type: Sequelize.ENUM('Admin', 'Vet', 'Client'),
                 allowNull: false,
             },
             email: {
@@ -26,6 +26,9 @@ module.exports = {
             phoneNumber: {
                 type: Sequelize.STRING,
             },
+            name: {
+                type: Sequelize.STRING
+            }
         });
     },
 

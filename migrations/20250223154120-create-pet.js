@@ -8,11 +8,11 @@ module.exports = {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            clientid: {
+            userid: {
                 type: Sequelize.INTEGER,
                 references: {
-                    model: 'clients',
-                    key: 'clientid',
+                    model: 'users',
+                    key: 'userid',
                 },
                 allowNull: false,
             },
@@ -31,7 +31,15 @@ module.exports = {
             },
             medicalhistory: {
                 type: Sequelize.TEXT,
-            }
+            },
+            type: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            gender: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
         });
     },
 
