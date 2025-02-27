@@ -38,6 +38,15 @@ module.exports = {
                 phoneNumber: "8917929122",
                 name: "test"
             },
+            {
+                userid: 5,
+                username: "axewoodVet",
+                password: "$2b$10$L7BgfQWWvbwULBVqbrFygOJ0hZA05vTATWHGHUMg8RAgtdLIGLWle",
+                role: 'Vet',
+                email: "test5@mail.ru",
+                phoneNumber: "8917929122",
+                name: "test"
+            },
         ], {});
     },
 
