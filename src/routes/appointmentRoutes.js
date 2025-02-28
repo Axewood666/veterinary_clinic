@@ -3,7 +3,7 @@ const router = express.Router();
 const appointmentControler = require('../controllers/appointmentController');
 const { authenticate, authorize } = require('../middlewares/auth');
 
-router.POST('/clients', authenticate, clientController.getClients);
-router.get('/user/:userid/appointments', authenticate, )
+// router.POST('/clients', authenticate, clientController.getClients);
+router.get('/user/:userid/appointments', authenticate, appointmentControler.getAppointments)
 
 module.exports = router;

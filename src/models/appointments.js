@@ -3,9 +3,9 @@ const sequelize = require('../config/db');
 const Pet = require('./pet');
 const User = require('./user');
 
-class Appointments extends Model {}
+class Appointment extends Model {}
 
-Appointments.init({
+Appointment.init({
     appointmentid: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -42,9 +42,12 @@ Appointments.init({
         type: DataTypes.ENUM("0", "1", "2"),
         allowNull: false,
         defaultValue: "0"
-    },
+    }}
+    ,{
     sequelize,
     modelName: 'appointment',
     tableName: 'appointments',
     timestamps: false,
-})
+});
+
+module.exports = Appointment;
