@@ -7,7 +7,7 @@ exports.getAppointments = async (req, res) => {
         const userid = req.params.userid;
         const user = req.user;
 
-        if (user.role === 'Client' && user.userid !== userid) {
+        if (user.role == 'Client' && user.userid != userid) {
             return res.status(403).json({ message: 'You are not allowed to receive this client\'s appointments' });
         }
 

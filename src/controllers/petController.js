@@ -34,13 +34,15 @@ exports.getClientPets = async (req, res) => {
     try {
         const clientId = req.params.clientId;
         const user = req.user;
-        if (user.role === 'Client' && user.userid !== clientId) {
-            return res.status(403).json({ message: 'You are not allowed to receive this client\'s pets' });
-        }
+
         const client = await Users.getById(clientId);
-        if (_.isEmpty(client)) {
+        if (_.isEmpty(client) || (user.role == 'Client' && user.userid != clientId)) {
             return res.status(404).json({ message: 'Client not found' });
         }
+
+        // if () {
+        //     return res.status(403).json({ message: 'You are not allowed to receive this client\'s pets' });
+        // }
 
         const pets = await Pets.getAll()
             .select('pets.userid', 'pets.petid', 'pets.name', 'pets.type', 'pets.gender',
