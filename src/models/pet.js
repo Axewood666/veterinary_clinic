@@ -1,52 +1,46 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const User = require('./user');
+const knex = require('knex');
+const db = require('../config/db');
 
-class Pet extends Model {}
+const Pet = {
+    getAll() {
+        return db('pets')
+            .select('*');
+    },
 
-Pet.init({
-    petid: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+    getById(petid) {
+        return db('pets')
+            .where({ petid })
+            .first();
     },
-    userid: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: User,
-            key: 'userid',
-        },
-        allowNull: false,
+
+    create(petData) {
+        return db('pets')
+            .insert(petData)
+            .returning('*');
     },
-    name: {
-        type: DataTypes.STRING,
-        unique: false,
-        allowNull: false,
+
+    update(petid, updateData) {
+        return db('pets')
+            .where({ petid })
+            .update(updateData)
+            .returning('*');
     },
-    breed: {
-        type: DataTypes.STRING,
-        allowNull: false,
+
+    delete(petid) {
+        return db('pets')
+            .where({ petid })
+            .del();
     },
-    age: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    medicalhistory: {
-        type: DataTypes.TEXT,
-    },
-    type: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    gender: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-}, {
-    sequelize,
-    modelName: 'pet',
-    tableName: 'pets',
-    timestamps: false,
-});
+
+    getAllWithRelations() {
+        return db('pets')
+            .join('users', 'pets.userid', '=', 'users.userid')
+            .select(
+                'pets.*',
+                'users.name as owner_name',
+                'users.email as owner_email'
+            );
+    }
+};
 
 module.exports = Pet;

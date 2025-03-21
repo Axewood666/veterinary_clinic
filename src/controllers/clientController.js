@@ -1,10 +1,10 @@
-const { User } = require('../models/');
+const { Users } = require('../models/');
 const { validationResult } = require('express-validator');
 
 
-exports.getClients = async(req, res) => {
+exports.getClients = async (req, res) => {
     try {
-        const clients = await User.findAll({ where: { role: "Client" } });
+        const clients = await Users.getAll().where({ role: "Client" });
         if (!clients) {
             res.status(404).json({ error: "Try again letter" });
             return;
@@ -15,10 +15,10 @@ exports.getClients = async(req, res) => {
     }
 }
 
-exports.getClient = async(req, res) => {
+exports.getClient = async (req, res) => {
     try {
         const clientid = req.params.id;
-        const client = await User.findOne({ where: { role: "Client", userid: clientid } });
+        const client = await Users.getById(clientid).where({ role: "Client" });
         if (!client) {
             res.status(404).json({ error: "The user was not found" });
             return;

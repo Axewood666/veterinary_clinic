@@ -1,41 +1,48 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const User = require('./user');
+// const knex = require('knex');
+// const config = require('../db');
 
-class Client extends Model {}
+// const db = knex(config);
 
-Client.init({
-    clientid: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    userid: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: User,
-            key: 'userid',
-        },
-        allowNull: false,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    address: {
-        type: DataTypes.STRING,
-    },
-    phoneNumber: {
-        type: DataTypes.STRING,
-    },
-    email: {
-        type: DataTypes.STRING,
-    },
-}, {
-    sequelize,
-    modelName: 'Client',
-    tableName: 'clients',
-    timestamps: false,
-});
+// const Client = {
+//     getAll() {
+//         return db('clients')
+//             .select('*');
+//     },
 
-module.exports = Client;
+//     getById(clientid) {
+//         return db('clients')
+//             .where({ clientid })
+//             .first();
+//     },
+
+//     create(clientData) {
+//         return db('clients')
+//             .insert(clientData)
+//             .returning('*');
+//     },
+
+//     update(clientid, updateData) {
+//         return db('clients')
+//             .where({ clientid })
+//             .update(updateData)
+//             .returning('*');
+//     },
+
+//     delete(clientid) {
+//         return db('clients')
+//             .where({ clientid })
+//             .del();
+//     },
+
+//     getAllWithRelations() {
+//         return db('clients')
+//             .join('users', 'clients.userid', '=', 'users.userid')
+//             .select(
+//                 'clients.*',
+//                 'users.name as user_name',
+//                 'users.email as user_email'
+//             );
+//     }
+// };
+
+// module.exports = Client;

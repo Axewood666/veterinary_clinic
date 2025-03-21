@@ -1,9 +1,15 @@
-const { Sequelize } = require('sequelize')
-require('dotenv').config();
+const knex = require('knex');
+const config = require('../../knexfile');
 
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-    host: process.env.DB_HOST,
-    dialect: 'postgres'
-});
+const environment = process.env.NODE_ENV || 'development';
+const db = knex(config[environment]);
 
-module.exports = sequelize;
+db.raw('SELECT 1')
+    .then(() => {
+        console.log('База данных подключена успешно');
+    })
+    .catch((err) => {
+        console.error('Ошибка подключения к базе данных:', err);
+    });
+
+module.exports = db;

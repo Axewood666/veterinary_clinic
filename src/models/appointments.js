@@ -1,53 +1,47 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
-const sequelize = require('../config/db');
-const Pet = require('./pet');
-const User = require('./user');
+const knex = require('knex');
+const db = require('../config/db');
 
-class Appointment extends Model {}
+const Appointments = {
+    getAll() {
+        return db('appointments')
+            .select('*');
+    },
 
-Appointment.init({
-    appointmentid: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+    getById(appointmentid) {
+        return db('appointments')
+            .where({ appointmentid })
+            .first();
     },
-    petid: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Pet,
-            key: "petid",
-        },
-        allowNull: false
+
+    create(appointmentData) {
+        return db('appointments')
+            .insert(appointmentData)
+            .returning('*');
     },
-    vetid: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: User,
-            key: "userid",
-        },
-        allowNull: false,
+
+    update(appointmentid, updateData) {
+        return db('appointments')
+            .where({ appointmentid })
+            .update(updateData)
+            .returning('*');
     },
-    date: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+
+    delete(appointmentid) {
+        return db('appointments')
+            .where({ appointmentid })
+            .del();
     },
-    diagnosis: {
-        type: DataTypes.STRING,
-    },
-    recomendations: {
-        type: DataTypes.TEXT,
-    },
-    status: {
-        type: DataTypes.ENUM("0", "1", "2"),
-        allowNull: false,
-        defaultValue: "0"
+
+    getAllWithRelations() {
+        return db('appointments')
+            .join('pets', 'appointments.petid', '=', 'pets.petid')
+            .join('users', 'appointments.vetid', '=', 'users.userid')
+            .select(
+                'appointments.*',
+                'pets.name as pet_name',
+                'users.firstname as vet_name'
+            );
     }
-}, {
-    sequelize,
-    modelName: 'appointment',
-    tableName: 'appointments',
-    timestamps: false,
-});
+};
 
-module.exports = Appointment;
+module.exports = Appointments;

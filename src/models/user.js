@@ -1,48 +1,52 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const knex = require('knex');
+const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
-class User extends Model {}
+const User = {
+    getAll() {
+        return db('users')
+            .select('*');
+    },
 
-User.init({
-    userid: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+    getById(userid) {
+        return db('users')
+            .where({ userid })
+            .first();
     },
-    username: {
-        type: DataTypes.STRING,
-        unique: true,
-        allowNull: false,
+
+    create(userData) {
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(userData.password, salt);
+        userData.password = hashedPassword;
+
+        return db('users')
+            .insert(userData)
+            .returning('*');
     },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        set(value) {
+
+    update(userid, updateData) {
+        if (updateData.password) {
             const salt = bcrypt.genSaltSync(10);
-            const hashedPassword = bcrypt.hashSync(value, salt);
-            this.setDataValue('password', hashedPassword);
-        },
+            const hashedPassword = bcrypt.hashSync(updateData.password, salt);
+            updateData.password = hashedPassword;
+        }
+
+        return db('users')
+            .where({ userid })
+            .update(updateData)
+            .returning('*');
     },
-    role: {
-        type: DataTypes.ENUM('Admin', 'Vet', 'Client'),
-        allowNull: false,
+
+    delete(userid) {
+        return db('users')
+            .where({ userid })
+            .del();
     },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    phoneNumber: {
-        type: DataTypes.STRING,
-    },
-    name: {
-        type: DataTypes.STRING,
+
+    getAllWithRelations() {
+        return db('users')
+            .select('*');
     }
-}, {
-    sequelize,
-    modelName: 'user',
-    tableName: 'users',
-    timestamps: false,
-});
+};
 
 module.exports = User;

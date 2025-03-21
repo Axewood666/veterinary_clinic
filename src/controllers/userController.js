@@ -1,22 +1,22 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 
-const { User } = require('../models/');
+const { Users } = require('../models/');
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
 
 
-exports.getUsers = async(req, res) => {
+exports.getUsers = async (req, res) => {
     try {
-        const users = await User.findAll();
+        const users = await Users.getAll();
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-exports.register = async(req, res) => {
+exports.register = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -24,17 +24,17 @@ exports.register = async(req, res) => {
 
     try {
         const { username, password, email, role } = req.body;
-        const existingUser = await User.findOne({ where: { username } });
+        const existingUser = await Users.getAll().where({ username }).first();
         if (existingUser) {
             return res.status(400).json({ message: 'Username already exists' });
         }
 
-        const existingEmail = await User.findOne({ where: { email } });
+        const existingEmail = await Users.getAll().where({ email }).first();
         if (existingEmail) {
             return res.status(400).json({ message: 'Email already registered' });
         }
 
-        const newUser = await User.create({
+        const newUser = await Users.create({
             username,
             password,
             email,
@@ -51,7 +51,7 @@ exports.register = async(req, res) => {
     }
 };
 
-exports.login = async(req, res) => {
+exports.login = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -60,7 +60,7 @@ exports.login = async(req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = await User.findOne({ where: { username } });
+        const user = await Users.getAll().where({ username }).first();
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
