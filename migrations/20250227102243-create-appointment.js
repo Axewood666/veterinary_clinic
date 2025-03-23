@@ -57,8 +57,8 @@ exports.up = function (knex) {
         table.text('comment');
         table.string('diagnosis');
         table.text('recomendations');
-        table.enu('status', ['scheduled', 'accepted', 'completed', 'cancelled']).notNullable().defaultTo('scheduled');
-        table.enu('type', ['consultation', 'vaccination', 'other']).notNullable().defaultTo('other');
+        table.enum('status', ['scheduled', 'accepted', 'completed', 'cancelled']).notNullable().defaultTo('scheduled');
+        table.enum('type', ['consultation', 'vaccination', 'other']).notNullable().defaultTo('other');
     });
 };
 

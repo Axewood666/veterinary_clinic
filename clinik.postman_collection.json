@@ -1,0 +1,672 @@
+{
+	"info": {
+		"_postman_id": "0cb1a175-3071-4541-b2a1-f7b741fa1084",
+		"name": "clinik",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41322093"
+	},
+	"item": [
+		{
+			"name": "clients",
+			"item": [
+				{
+					"name": "Employee",
+					"item": [
+						{
+							"name": "Get clients",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjU4NTU3OSwiZXhwIjoxNzQyNjI4Nzc5fQ.EdSLxwjCH2SDeBdl-WW6EEpDCoWV1bxYFObKr53CNio",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:3000/api/clients/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"clients",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "Clients",
+					"item": [
+						{
+							"name": "Register",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"axewoodClient\",\r\n    \"password\": \"axewood\",\r\n    \"role\": \"Client\",\r\n    \"email\": \"test2@mail.ru\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/auth/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"register"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"axewood\",\r\n    \"password\": \"axewood\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(Временный) получить пользователей",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pet",
+			"item": [
+				{
+					"name": "Employee",
+					"item": [
+						{
+							"name": "All pets",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjYyNjc2OCwiZXhwIjoxNzQyNjY5OTY4fQ.-1Z7yRkPwQY3pINhTOsD3Xv11d2lOxUuODDD9EjRnuY",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"medicalhistory\": \"test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/pets",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"pets"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get client's pets",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"medicalhistory\": \"test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/clients/2/pets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"clients",
+								"2",
+								"pets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add pet",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"type\": \"cat\",\r\n    \"gender\": \"female\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/clients/2/pets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"clients",
+								"2",
+								"pets"
+							]
+						},
+						"description": "Текст типо чо делает"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "appointments",
+			"item": [
+				{
+					"name": "Employee",
+					"item": [
+						{
+							"name": "Accept appointment",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjY0NTc1OCwiZXhwIjoxNzQyNjg4OTU4fQ.dSaW4UjP2ErCFqZsyWYIJNASFKlXBSR9-BIGhyQcE1c",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"medicalhistory\": \"test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/clients/1/appointments/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"clients",
+										"1",
+										"appointments",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update appointment",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{   \r\n    \"recomendations\": \"tea\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/clients/2/appointments/5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"clients",
+										"2",
+										"appointments",
+										"5"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Сlient's appointments",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"medicalhistory\": \"test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/clients/1/appointments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"clients",
+								"1",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete appointment",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjY0NTc1OCwiZXhwIjoxNzQyNjg4OTU4fQ.dSaW4UjP2ErCFqZsyWYIJNASFKlXBSR9-BIGhyQcE1c",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Test create\",\r\n    \"age\": 1,\r\n    \"breed\": \"Cиамская\",\r\n    \"medicalhistory\": \"test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/clients/1/appointments/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"clients",
+								"1",
+								"appointments",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add appointment",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"petid\": 2,\r\n    \"vetid\": 5,\r\n    \"date\": \"2025-03-24T14:00:00.000\",\r\n    \"comment\": \"Ежегодный осмотр\",\r\n    \"type\": \"consultation\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/clients/2/appointments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"clients",
+								"2",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "vets",
+			"item": [
+				{
+					"name": "Employee",
+					"item": [
+						{
+							"name": "Get all schedules",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/vets/shedules",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"vets",
+										"shedules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get schedules by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/vets/shedules/5",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"vets",
+										"shedules",
+										"5"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get available slots",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/vets/shedules/5/slots",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"vets",
+								"shedules",
+								"5",
+								"slots"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "03.24.2025",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get vets",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/vets",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"vets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

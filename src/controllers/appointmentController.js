@@ -1,4 +1,4 @@
-const { Users, Pets, Appointments } = require('../models/');
+const { Users, Pets, Appointments, VetSchedules } = require('../models/');
 const { validationResult } = require('express-validator');
 const _ = require('lodash');
 
@@ -17,6 +17,8 @@ exports.getAppointments = async (req, res) => {
         const client = await Users.getById(userid);
         if (_.isEmpty(client)) {
             return res.status(404).json({ message: 'Client not found' });
+        } else if (client.role != 'Client') {
+            return res.status(403).json({ message: 'This action is only allowed for clients accounts' });
         }
 
         const pets = await Pets.getAll().where({ userid });
@@ -49,6 +51,14 @@ exports.createAppointment = async (req, res) => {
             });
         }
 
+        const validDate = new Date(req.body.date);
+        const currentDate = new Date();
+        const sevenDaysFromNow = new Date(currentDate.getTime());
+        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+        if (validDate < currentDate || validDate > sevenDaysFromNow) {
+            return res.status(400).json({ message: 'Date must be within 7 days' });
+        }
+
         const user = req.user;
         const userid = req.params.userid;
 
@@ -56,15 +66,36 @@ exports.createAppointment = async (req, res) => {
             return res.status(403).json({ message: 'You are not allowed' });
         }
 
+        const client = await Users.getById(userid);
+        if (_.isEmpty(client)) {
+            return res.status(404).json({ message: 'Client not found' });
+        } else if (client.role != 'Client') {
+            return res.status(403).json({ message: 'This action is only allowed for clients accounts' });
+        }
+
         const pet = await Pets.getById(req.body.petid);
         if (_.isEmpty(pet)) {
             return res.status(404).json({
                 message: 'Pet not found'
             });
-        } else if (user.role == 'Client' && pet.userid != userid) {
+        } else if (pet.userid != userid) {
             return res.status(403).json({
-                message: 'You are not allowed to create appointments for other clients'
+                message: 'This pet is not assigned to this client'
             });
+        }
+
+        const vet = await Users.getById(req.body.vetid);
+        if (_.isEmpty(vet) || vet.role != 'Vet') {
+            return res.status(404).json({ message: 'Vet not found' });
+        }
+
+        const availableSlots = await VetSchedules.getAvailableSlots(vet.userid, validDate);
+        if (_.isEmpty(availableSlots)) {
+            return res.status(404).json({ message: 'No available slots' });
+        }
+        const slot = availableSlots.find(slot => slot.start == validDate.getHours() + ':' + (validDate.getMinutes() < 10 ? '0' + validDate.getMinutes() : validDate.getMinutes()));
+        if (_.isEmpty(slot)) {
+            return res.status(404).json({ message: 'No available slots' });
         }
 
         const { petid, date, comment, vetid, type } = req.body;

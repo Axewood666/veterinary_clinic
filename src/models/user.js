@@ -1,4 +1,3 @@
-const knex = require('knex');
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
@@ -46,6 +45,12 @@ const User = {
     getAllWithRelations() {
         return db('users')
             .select('*');
+    },
+
+    getVeterinarians() {
+        return db('users')
+            .where({ role: 'Vet' })
+            .select('userid', 'name');
     }
 };
 

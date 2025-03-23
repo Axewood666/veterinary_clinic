@@ -9,8 +9,8 @@ exports.seed = function (knex) {
                     age: 6,
                     breed: 'Лабрадор',
                     medicalhistory: "test",
-                    type: "Кот",
-                    gender: "мальчик"
+                    type: "cat",
+                    gender: "male"
                 },
                 {
                     petid: 2,
@@ -19,8 +19,8 @@ exports.seed = function (knex) {
                     age: 6,
                     breed: 'Лабрадор',
                     medicalhistory: "test2",
-                    type: "Кот",
-                    gender: "мальчик"
+                    type: "dog",
+                    gender: "male"
                 },
                 {
                     petid: 3,
@@ -29,8 +29,8 @@ exports.seed = function (knex) {
                     age: 6,
                     breed: 'Лабрадор',
                     medicalhistory: "test3",
-                    type: "Собака",
-                    gender: "Сука"
+                    type: "dog",
+                    gender: "female"
                 }
             ]);
         });

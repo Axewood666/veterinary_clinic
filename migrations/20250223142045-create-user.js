@@ -42,7 +42,7 @@ exports.up = function (knex) {
         table.increments('userid').primary();
         table.string('username').notNullable().unique();
         table.string('password').notNullable();
-        table.enu('role', ['Admin', 'Vet', 'Client', 'Manager']).notNullable();
+        table.enum('role', ['Admin', 'Vet', 'Client', 'Manager']).notNullable();
         table.string('email').notNullable();
         table.string('phoneNumber');
         table.string('name');
