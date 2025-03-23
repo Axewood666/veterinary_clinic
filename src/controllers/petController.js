@@ -9,8 +9,9 @@ exports.addPet = async (req, res) => {
     }
     try {
         const clientId = req.params.clientId;
-        const petData = req.body;
+        const { name, type, gender, age, breed } = req.body;
         const user = req.user;
+
 
         if (user.role === 'Client' && user.userid !== clientId) {
             return res.status(403).json({ message: 'You are not allowed to add a pet to this client' });
@@ -21,7 +22,7 @@ exports.addPet = async (req, res) => {
             return res.status(404).json({ message: 'Client not found' });
         }
 
-        let [newPet] = await Pets.create({ ...petData, userid: clientId });
+        let [newPet] = await Pets.create({ name, type, gender, age, breed, userid: clientId });
 
         res.status(201).json(newPet);
     } catch (error) {
@@ -68,7 +69,7 @@ exports.getClientPets = async (req, res) => {
                 medicalhistory: pet.medicalhistory
             }))
         }
-        res.status(201).json(response);
+        res.status(200).json(response);
     } catch (error) {
         console.error('Error get pets:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -110,7 +111,7 @@ exports.getAllPets = async (req, res) => {
 
         response.clients = Object.values(groupedByClient);
 
-        res.status(201).json(response);
+        res.status(200).json(response);
     } catch (error) {
         console.error('Error get pets:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });

@@ -39,7 +39,7 @@ const Appointments = {
             .select(
                 'appointments.*',
                 'pets.name as pet_name',
-                'users.firstname as vet_name'
+                'users.name as vet_name'
             );
     }
 };

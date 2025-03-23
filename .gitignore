@@ -1,5 +1,6 @@
 knexfile.js
 config/*
+.vscode
 # Logs
 logs
 *.log

@@ -54,13 +54,17 @@ exports.up = function (knex) {
         table.integer('petid').references('petid').inTable('pets').notNullable();
         table.integer('vetid').references('userid').inTable('users').notNullable();
         table.timestamp('date').notNullable().defaultTo(knex.fn.now());
+        table.text('comment');
         table.string('diagnosis');
         table.text('recomendations');
-        table.enu('status', ['scheduled', 'completed', 'cancelled']).notNullable().defaultTo('scheduled');
+        table.enu('status', ['scheduled', 'accepted', 'completed', 'cancelled']).notNullable().defaultTo('scheduled');
+        table.enu('type', ['consultation', 'vaccination', 'other']).notNullable().defaultTo('other');
     });
 };
 
 
-exports.down = function (knex) {
+exports.down = async function (knex) {
+    await knex.raw('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS appointments_type_check');
+    await knex.raw('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS appointments_status_check');
     return knex.schema.dropTable('appointments');
 };

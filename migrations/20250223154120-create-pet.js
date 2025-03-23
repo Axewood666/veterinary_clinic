@@ -55,11 +55,13 @@ exports.up = function (knex) {
         table.string('breed').notNullable();
         table.integer('age').notNullable();
         table.text('medicalhistory');
-        table.string('type').notNullable();
-        table.string('gender').notNullable();
+        table.enum('type', ['dog', 'cat', 'bird', 'fish', 'other']).notNullable();
+        table.enum('gender', ['male', 'female']).notNullable();
     });
 };
 
-exports.down = function (knex) {
+exports.down = async function (knex) {
+    await knex.raw('ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_type_check');
+    await knex.raw('ALTER TABLE pets DROP CONSTRAINT IF EXISTS pets_gender_check');
     return knex.schema.dropTable('pets');
 };

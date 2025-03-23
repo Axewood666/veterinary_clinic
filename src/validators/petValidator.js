@@ -12,6 +12,12 @@ const petAddValidator = () => {
 
         body('age')
             .isInt({ min: 0 }).withMessage('Age must be a non-negative integer.'),
+
+        body('gender')
+            .isIn(['male', 'female']).withMessage('Gender must be either "male" or "female".'),
+
+        body('type')
+            .isIn(['dog', 'cat', 'bird', 'fish', 'other']).withMessage('Type must be one of: dog, cat, bird, fish, other.'),
     ];
 };
 

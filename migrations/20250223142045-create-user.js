@@ -42,13 +42,14 @@ exports.up = function (knex) {
         table.increments('userid').primary();
         table.string('username').notNullable().unique();
         table.string('password').notNullable();
-        table.enu('role', ['Admin', 'Vet', 'Client']).notNullable();
+        table.enu('role', ['Admin', 'Vet', 'Client', 'Manager']).notNullable();
         table.string('email').notNullable();
         table.string('phoneNumber');
         table.string('name');
     });
 };
 
-exports.down = function (knex) {
+exports.down = async function (knex) {
+    await knex.raw('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
     return knex.schema.dropTable('users');
 };

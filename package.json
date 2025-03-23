@@ -10,8 +10,11 @@
         "migrate:rollback": "knex migrate:rollback",
         "seed": "knex seed:run",
         "migrate:status": "knex migrate:status",
-        "test": "mocha 'tests/**/*.test.js' --timeout 10000",
-        "test:watch": "mocha 'tests/**/*.test.js' --watch"
+        "test": "NODE_ENV=test mocha 'tests/**/*.test.js' --timeout 10000 --exit",
+        "test:watch": "NODE_ENV=test mocha 'tests/**/*.test.js' --watch",
+        "test:migrate": "NODE_ENV=test knex migrate:latest",
+        "test:migrate:rollback": "NODE_ENV=test knex migrate:rollback",
+        "test:seed": "NODE_ENV=test knex seed:run"
     },
     "repository": {
         "type": "git",

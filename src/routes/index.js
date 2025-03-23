@@ -1,12 +1,12 @@
 const express = require('express');
-const userRoutes = require('./userRoutes');
+const authRoutes = require('./authRoutes');
 const clientRoutes = require('./clientRoutes');
 const petRoutes = require('./petRoutes');
 const appointmentRoutes = require('./appointmentRoutes');
 
 const router = express.Router();
 
-router.use(userRoutes);
+router.use(authRoutes);
 router.use(clientRoutes);
 router.use(petRoutes);
 router.use(appointmentRoutes);

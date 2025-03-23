@@ -3,7 +3,8 @@ const chai = require('chai');
 const expect = chai.expect;
 const app = require('../../src/app');
 const db = require('../../src/config/db');
-const { Pets, Users, Appointments } = require('../../src/models');
+const { Pets, Users } = require('../../src/models');
+const { login } = require('../auth/auth_endpoint.test');
 
 describe('Pet Endpoints', () => {
     var testUser = {
@@ -14,6 +15,14 @@ describe('Pet Endpoints', () => {
         role: 'Client'
     };
 
+    var testAdmin = {
+        name: 'Test Admin',
+        username: 'admin',
+        password: 'admin',
+        email: "admin@mail.ru",
+        role: 'Admin'
+    };
+
     before(async () => {
         await db('appointments').del();
         await db('pets').del();
@@ -22,10 +31,15 @@ describe('Pet Endpoints', () => {
         testUser = await Users.create(testUser);
         testUser = testUser[0];
         testUser.password = 'axewood';
+
+        testAdmin = await Users.create(testAdmin);
+        testAdmin = testAdmin[0];
+        testAdmin.password = 'admin';
+
         await Pets.create({
             userid: testUser.userid,
             name: 'Test Pet',
-            type: 'Dog',
+            type: 'dog',
             breed: 'Labrador',
             gender: 'male',
             age: 2,
@@ -40,11 +54,13 @@ describe('Pet Endpoints', () => {
 
     describe('GET /clients/:clientId/pets', () => {
         it('успешное получение питомцев клиента', async () => {
-            const token = await generateTestToken(testUser);
+            const token = await login(testUser);
+
             const response = await request(app)
                 .get(`/api/clients/${testUser.userid}/pets`)
                 .set('Authorization', `Bearer ${token}`);
-            expect(response.status).to.equal(201);
+
+            expect(response.status).to.equal(200);
             expect(response.body).to.have.property('pets');
             expect(response.body.pets).to.be.an('array');
             expect(response.body.pets[0]).to.have.property('name', 'Test Pet');
@@ -58,7 +74,7 @@ describe('Pet Endpoints', () => {
         });
 
         it('клиент не найден', async () => {
-            const token = await generateTestToken(testUser);
+            const token = await login(testUser);
 
             const response = await request(app)
                 .get('/api/clients/999/pets')
@@ -69,31 +85,40 @@ describe('Pet Endpoints', () => {
         });
     });
 
-    // describe('GET /pets', () => {
-    //     it('получение всех питомцев (только для админа)', async () => {
-    //         const adminToken = generateTestToken({
-    //             userid: 2,
-    //             role: 'Admin'
-    //         });
+    describe('GET /pets', () => {
+        it('получение всех питомцев (только для админа)', async () => {
+            const adminToken = await login(testAdmin);
 
-    //         const response = await request(app)
-    //             .get('/pets')
-    //             .set('Authorization', `Bearer ${adminToken}`);
+            const response = await request(app)
+                .get('/api/pets')
+                .set('Authorization', `Bearer ${adminToken}`);
 
-    //         expect(response.status).to.equal(200);
-    //         expect(response.body).to.have.property('pets');
-    //         expect(response.body.pets).to.be.an('array');
-    //     });
-    // });
-});
-
-async function generateTestToken(user) {
-    const response = await request(app)
-        .post('/api/users/login')
-        .send({
-            username: user.username,
-            password: user.password
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('clients');
+            expect(response.body.clients).to.be.an('array');
+            expect(response.body.clients[0]).to.have.property('name', 'Test User');
+            expect(response.body.clients[0]).to.have.property('clientid', testUser.userid);
+            expect(response.body.clients[0]).to.have.property('pets');
+            expect(response.body.clients[0].pets).to.be.an('array');
+            expect(response.body.clients[0].pets[0]).to.have.property('name', 'Test Pet');
         });
 
-    return response.body.token;
-}
+        it('доступ запрещен для неавторизованного пользователя', async () => {
+            const response = await request(app)
+                .get('/api/pets');
+
+            expect(response.status).to.equal(401);
+        });
+
+        it('доступ запрещен для пользователя', async () => {
+            const token = await login(testUser);
+
+            const response = await request(app)
+                .get('/api/pets')
+                .set('Authorization', `Bearer ${token}`);
+
+            expect(response.status).to.equal(403);
+        });
+    });
+});
+
