@@ -31,6 +31,33 @@ exports.addPet = async (req, res) => {
     }
 };
 
+exports.updatePet = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const petid = req.params.petid;
+        const { name, type, gender, age, breed, medicalhistory } = req.body;
+
+        const pet = await Pets.getById(petid);
+        if (_.isEmpty(pet)) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+
+        const updatedPet = await Pets.update(petid, { name, type, gender, age, breed, medicalhistory });
+        if (_.isEmpty(updatedPet)) {
+            return res.status(400).json({ message: 'Failed to update pet' });
+        }
+
+        res.status(200).json(updatedPet[0]);
+    } catch (error) {
+        console.error('Error updating pet:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+}
+
 exports.getClientPets = async (req, res) => {
     try {
         const clientId = req.params.clientId;

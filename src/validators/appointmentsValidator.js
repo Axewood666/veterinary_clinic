@@ -20,8 +20,6 @@ exports.validateAppointment = [
         .withMessage('Invalid date format'),
 
     body('comment')
-        .notEmpty()
-        .withMessage('Comment is required')
         .isString()
         .withMessage('Comment must be a string')
         .trim(),
