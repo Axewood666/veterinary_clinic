@@ -42,18 +42,10 @@ exports.getAppointments = async (req, res) => {
 };
 
 exports.createAppointment = async (req, res) => {
+    const { userid } = req.params;
+    const { petid, date, comment, vetid, type } = req.body;
+
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                message: 'Validation error',
-                errors: errors.array()
-            });
-        }
-
-        const { userid } = req.params;
-        const { petid, date, comment, vetid, type } = req.body;
-
         if (!isValidDate(date)) {
             return res.status(400).json({ message: 'Date must be within the next 7 days' });
         }

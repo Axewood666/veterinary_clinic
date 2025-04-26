@@ -3,16 +3,11 @@ const { validationResult } = require('express-validator');
 const _ = require('lodash');
 
 exports.addPet = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    const clientId = req.params.clientId;
+    const { name, type, gender, age, breed } = req.body;
+    const user = req.user;
+
     try {
-        const clientId = req.params.clientId;
-        const { name, type, gender, age, breed } = req.body;
-        const user = req.user;
-
-
         if (user.role === 'Client' && user.userid !== clientId) {
             return res.status(403).json({ message: 'You are not allowed to add a pet to this client' });
         }
@@ -32,15 +27,10 @@ exports.addPet = async (req, res) => {
 };
 
 exports.updatePet = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    const petid = req.params.petid;
+    const { name, type, gender, age, breed, medicalhistory } = req.body;
 
     try {
-        const petid = req.params.petid;
-        const { name, type, gender, age, breed, medicalhistory } = req.body;
-
         const pet = await Pets.getById(petid);
         if (_.isEmpty(pet)) {
             return res.status(404).json({ message: 'Pet not found' });

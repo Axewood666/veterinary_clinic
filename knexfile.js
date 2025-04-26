@@ -20,8 +20,8 @@ module.exports = {
         seeds: {
             directory: './seeders'
         },
-        debug: true
-    }
+        debug: false
+    },
     test: {
         client: 'pg',
         connection: {
