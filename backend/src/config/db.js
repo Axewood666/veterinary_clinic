@@ -6,10 +6,10 @@ const db = knex(config[environment]);
 
 db.raw('SELECT 1')
     .then(() => {
-        console.log('База данных подключена успешно');
+        console.log('The database is connected successfully');
     })
     .catch((err) => {
-        console.error('Ошибка подключения к базе данных:', err);
+        console.error('Database connection error: ', err);
     });
 
 module.exports = db;

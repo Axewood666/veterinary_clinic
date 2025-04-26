@@ -1,4 +1,4 @@
-const { Users, Pets, Appointments, VetSchedules } = require('../models/');
+const { Users, Pets, Appointments, VetSchedules } = require('../models');
 const { validationResult } = require('express-validator');
 const _ = require('lodash');
 

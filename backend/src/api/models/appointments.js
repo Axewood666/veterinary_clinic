@@ -1,5 +1,5 @@
 const knex = require('knex');
-const db = require('../config/db');
+const db = require('../../config/db');
 
 const Appointments = {
     getAll() {

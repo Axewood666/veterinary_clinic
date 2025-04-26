@@ -1,14 +1,14 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 
-const { Users, invitation_token } = require('../models/');
+const { Users, invitation_token } = require('../models');
 const { sendInvitationEmail } = require("../services/mailerService");
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
 
 
-exports.getUsers = async (res) => {
+exports.getUsers = async (req, res) => {
     try {
         const users = await Users.getAll();
         res.status(200).json(users);
@@ -80,20 +80,20 @@ exports.sendInvite = async (req, res) => {
         const existingInvitation = await invitation_token.getExistingInventationByEmail(email);
         if (existingInvitation) {
             return res.status(400).json({
-                message: `Активное приглашение для ${email} уже существует`
+                message: `An active invitation for ${email} already exists`
             });
         }
 
         const existingUser = await Users.getAll().where({ email }).first();
         if (existingUser) {
             return res.status(400).json({
-                message: `${email} уже занят`
+                message: `${email} is already busy`
             });
         }
 
         const newToken = await invitation_token.create(email, role);
         if (!newToken?.length) {
-            throw new Error('Не удалось создать токен приглашения');
+            throw new Error('Failed to create an invitation token');
         }
 
         try {
@@ -101,19 +101,19 @@ exports.sendInvite = async (req, res) => {
         } catch (mailError) {
             await invitation_token.deleteByToken(newToken[0].token);
             return res.status(500).json({
-                message: "Ошибка отправки письма. Попробуйте еще раз."
+                message: "Error sending the email. Try again."
             });
         }
 
         return res.status(201).json({
-            message: `Приглашение на почту ${email} было отправлено`
+            message: `The invitation has been sent to ${email}`
         });
     } catch (error) {
         console.error('Invite create error:', error);
 
         if (error.message.includes('duplicate key value')) {
             return res.status(400).json({
-                message: "Приглашение с таким токеном уже существует"
+                message: "An invitation with such a token already exists"
             });
         }
 
@@ -144,7 +144,7 @@ exports.registerByInvite = async (req, res) => {
         });
 
         if (!newUser?.length) {
-            throw new Error('Не удалось зарегистрироваться. Повторите попытку позднее');
+            throw new Error('Failed to register. Please try again later.');
         }
 
         await invitation_token.updateUsedByToken(token);

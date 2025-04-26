@@ -1,4 +1,4 @@
-const { Users, VetSchedules, Pets } = require('../models/');
+const { Users, VetSchedules, Pets } = require('../models');
 
 exports.getVetSchedules = async (req, res) => {
     const vetSchedules = await VetSchedules.getAllWithRelations();
