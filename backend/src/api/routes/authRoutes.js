@@ -6,9 +6,11 @@ const { authenticate, authorize } = require('../middlewares/auth');
 const validateResult = require('../middlewares/validateResult');
 
 router.get('/users', authenticate, authorize(["Admin"]), userController.getUsers);
+router.get('/me', authenticate, userController.getTokenData);
 router.post('/auth/register', registerValidationRules(), validateResult, userController.register);
 router.post('/auth/register/invite', registerByInviteValidationRules(), validateResult, userController.registerByInvite);
 router.post('/auth/login', loginValidationRules(), validateResult, userController.login);
+router.post('/auth/logout', authenticate, userController.logout)
 router.post('/auth/sendInvite', authenticate, authorize(["Admin"]), sendInviteValidationRules(), validateResult, userController.sendInvite);
 
 module.exports = router;

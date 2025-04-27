@@ -13,7 +13,60 @@
 					"name": "Employee",
 					"item": [
 						{
-							"name": "Get clients",
+							"name": "Get client by id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {",
+											"  pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Response has the required fields\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('object');",
+											"    pm.expect(responseData).to.have.property('userid');",
+											"    pm.expect(responseData).to.have.property('username');",
+											"    pm.expect(responseData).to.have.property('password');",
+											"    pm.expect(responseData).to.have.property('role');",
+											"    pm.expect(responseData).to.have.property('email');",
+											"    pm.expect(responseData).to.have.property('phoneNumber');",
+											"    pm.expect(responseData).to.have.property('name');",
+											"});",
+											"",
+											"",
+											"pm.test(\"Email is in a valid format\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData.email).to.be.a('string');",
+											"    pm.expect(responseData.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Phone number is either null or in a valid format\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('object');",
+											"    pm.expect(responseData.phoneNumber).to.satisfy(function (phoneNumber) {",
+											"        return phoneNumber === null || /^\\d{10}$/.test(phoneNumber);",
+											"    }, \"Phone number should be either null or a 10-digit number\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Username is a non-empty string\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('object');",
+											"  pm.expect(responseData.username).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"auth": {
 									"type": "noauth"
@@ -22,7 +75,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjU4NTU3OSwiZXhwIjoxNzQyNjI4Nzc5fQ.EdSLxwjCH2SDeBdl-WW6EEpDCoWV1bxYFObKr53CNio",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -37,6 +90,89 @@
 										"api",
 										"clients",
 										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get clients",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response Content-Type is application/json\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Validate userid, username, password, role, email, phoneNumber, and name fields\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('object');",
+											"  pm.expect(responseData.userid).to.exist.and.to.be.a('number');",
+											"  pm.expect(responseData.username).to.exist.and.to.be.a('string');",
+											"  pm.expect(responseData.password).to.exist.and.to.be.a('string');",
+											"  pm.expect(responseData.role).to.exist.and.to.be.a('string');",
+											"  pm.expect(responseData.email).to.exist.and.to.be.a('string');",
+											"  pm.expect(responseData.phoneNumber).to.exist;",
+											"  pm.expect(responseData.name).to.exist.and.to.be.a('string');",
+											"});",
+											"",
+											"",
+											"pm.test(\"Username is a non-empty string\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('object');",
+											"  pm.expect(responseData.username).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Role is a valid role type\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('object');",
+											"  pm.expect(responseData.role).to.exist.and.to.be.a('string');",
+											"});",
+											"",
+											"",
+											"pm.test(\"Phone number is either null or a valid phone number format\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('object');",
+											"    pm.expect(responseData.phoneNumber).to.satisfy(function (phoneNumber) {",
+											"        return phoneNumber === null || /^\\d{10}$/.test(phoneNumber);",
+											"    }, \"Phone number should be either null or a valid 10-digit number\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:3000/api/clients",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"clients"
 									]
 								}
 							},
@@ -88,7 +224,166 @@
 					]
 				},
 				{
+					"name": "Admin",
+					"item": [
+						{
+							"name": "Получить пользователей",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Response has the required fields\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('array');",
+											"    responseData.forEach(function(user) {",
+											"        pm.expect(user).to.include.all.keys('userid', 'username', 'password', 'role', 'email', 'phoneNumber', 'name');",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Email is in a valid format\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  responseData.forEach(function(user) {",
+											"    pm.expect(user.email).to.be.a('string').and.to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+											"  });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Response content type is application/json\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Userid is a non-negative integer\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    responseData.forEach(function(user) {",
+											"        pm.expect(user.userid).to.be.a('number').and.to.satisfy((num) => num >= 0, \"Userid should be a non-negative integer\");",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:3000/api/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendInvite",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"igor.zhugar@mail.ru\",\r\n    \"role\": \"Vet\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/auth/sendInvite",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"sendInvite"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type is application/json\", function () {",
+									"  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is present in the response\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.token).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is in a valid format\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.token).to.be.a('string').and.to.match(/[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -121,10 +416,185 @@
 					"response": []
 				},
 				{
-					"name": "(Временный) получить пользователей",
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required field 'message'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.have.property('message');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Message is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.message).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(300);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"axewood\",\r\n    \"password\": \"axewood\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register/invite",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"7b97c47e-7632-47c3-99a4-922340787d76\",\r\n    \"username\": \"fromIvite\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/register/invite",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"invite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTokenData",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"User object contains the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData.user).to.be.an('object');",
+									"    pm.expect(responseData.user).to.have.property('username');",
+									"    pm.expect(responseData.user).to.have.property('role');",
+									"    pm.expect(responseData.user).to.have.property('userid');",
+									"    pm.expect(responseData.user).to.have.property('iat');",
+									"    pm.expect(responseData.user).to.have.property('exp');",
+									"});",
+									"",
+									"",
+									"pm.test(\"User object properties validation\", function () {",
+									"    const responseData = pm.response.json().user;",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.username).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+									"    pm.expect(responseData.role).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Role should not be empty\");",
+									"    pm.expect(responseData.userid).to.be.a('number').and.to.be.at.least(0, \"Userid should be a non-negative integer\");",
+									"    pm.expect(responseData.iat).to.be.a('number').and.to.be.at.least(0, \"Iat should be a non-negative integer\");",
+									"    pm.expect(responseData.exp).to.be.a('number').and.to.be.at.least(0, \"Exp should be a non-negative integer\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Iat and exp fields represent valid timestamps\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.user.iat).to.be.a('number', \"Iat should be a number\");",
+									"  pm.expect(responseData.user.exp).to.be.a('number', \"Exp should be a number\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"me"
+							]
+						}
 					},
 					"response": []
 				}
@@ -138,6 +608,75 @@
 					"item": [
 						{
 							"name": "All pets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content-Type header is application/json\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Clients array in the response should exist and be an array\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData.clients).to.exist.and.to.be.an('array');",
+											"});",
+											"",
+											"",
+											"pm.test(\"Validate the pets array within the clients array\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData.clients).to.be.an('array');",
+											"    responseData.clients.forEach(function(client) {",
+											"        pm.expect(client.pets).to.be.an('array');",
+											"        client.pets.forEach(function(pet) {",
+											"            pm.expect(pet).to.be.an('object');",
+											"            pm.expect(pet.petid).to.be.a('number');",
+											"            pm.expect(pet.name).to.be.a('string');",
+											"            pm.expect(pet.type).to.be.a('string');",
+											"            pm.expect(pet.gender).to.be.a('string');",
+											"            pm.expect(pet.age).to.be.a('number');",
+											"            pm.expect(pet.breed).to.be.a('string');",
+											"            pm.expect(pet.medicalhistory).to.be.a('string');",
+											"        });",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Validate the required fields within the pets array\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('object');",
+											"    pm.expect(responseData.clients).to.be.an('array');",
+											"    ",
+											"    responseData.clients.forEach(function(client) {",
+											"        pm.expect(client).to.be.an('object');",
+											"        pm.expect(client.pets).to.be.an('array');",
+											"        ",
+											"        client.pets.forEach(function(pet) {",
+											"            pm.expect(pet).to.be.an('object');",
+											"            pm.expect(pet.petid).to.exist;",
+											"            pm.expect(pet.name).to.exist;",
+											"            pm.expect(pet.type).to.exist;",
+											"            pm.expect(pet.gender).to.exist;",
+											"            pm.expect(pet.age).to.exist;",
+											"            pm.expect(pet.breed).to.exist;",
+											"            pm.expect(pet.medicalhistory).to.exist;",
+											"        });",
+											"    });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -149,7 +688,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjYyNjc2OCwiZXhwIjoxNzQyNjY5OTY4fQ.-1Z7yRkPwQY3pINhTOsD3Xv11d2lOxUuODDD9EjRnuY",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -192,7 +731,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -206,7 +745,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/clients/2/pets",
+							"raw": "http://localhost:3000/api/clients/3/pets",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -215,7 +754,7 @@
 							"path": [
 								"api",
 								"clients",
-								"2",
+								"3",
 								"pets"
 							]
 						}
@@ -232,7 +771,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -281,7 +820,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjY0NTc1OCwiZXhwIjoxNzQyNjg4OTU4fQ.dSaW4UjP2ErCFqZsyWYIJNASFKlXBSR9-BIGhyQcE1c",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -322,7 +861,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -357,6 +896,62 @@
 				},
 				{
 					"name": "Сlient's appointments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+									"    ",
+									"    const requiredFields = [\"appointmentid\", \"petid\", \"vetid\", \"date\", \"comment\", \"diagnosis\", \"recomendations\", \"status\", \"type\", \"pet_name\", \"vet_name\"];",
+									"    ",
+									"    responseData.forEach(appointment => {",
+									"        requiredFields.forEach(field => {",
+									"            pm.expect(appointment).to.have.property(field);",
+									"        });",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Date is in a valid date format\", function () {",
+									"    const appointments = pm.response.json();",
+									"    ",
+									"    appointments.forEach(function(appointment) {",
+									"        pm.expect(appointment.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Status is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  responseData.forEach(appointment => {",
+									"    pm.expect(appointment.status).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Status should be a non-empty string\");",
+									"  });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Petid and vetid should be non-negative integers\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    responseData.forEach(appointment => {",
+									"        pm.expect(appointment.petid).to.be.a('number').and.to.be.at.least(0, \"Petid should be a non-negative integer\");",
+									"        pm.expect(appointment.vetid).to.be.a('number').and.to.be.at.least(0, \"Vetid should be a non-negative integer\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -368,7 +963,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -400,6 +995,47 @@
 				},
 				{
 					"name": "Delete appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required field 'message'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.message).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Message is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.message).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Message should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Verify that the appointment with ID 3 is deleted\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.message).to.exist.and.to.not.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -408,7 +1044,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjY0NTc1OCwiZXhwIjoxNzQyNjg4OTU4fQ.dSaW4UjP2ErCFqZsyWYIJNASFKlXBSR9-BIGhyQcE1c",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -449,7 +1085,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -489,6 +1125,59 @@
 					"item": [
 						{
 							"name": "Get all schedules",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.expect(pm.response.code).to.equal(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Response has the required fields\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('array');",
+											"    responseData.forEach(function(schedule) {",
+											"        pm.expect(schedule).to.include.all.keys('id', 'vetid', 'day', 'start_time', 'end_time', 'is_active', 'name');",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Day is a valid day of the week\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('array');",
+											"    responseData.forEach(function(schedule) {",
+											"        pm.expect(schedule.day).to.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/);",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Start_time and end_time are in a valid time format\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('array');",
+											"    responseData.forEach(function(schedule) {",
+											"        pm.expect(schedule.start_time).to.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, \"Start time should be in HH:MM format\");",
+											"        pm.expect(schedule.end_time).to.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, \"End time should be in HH:MM format\");",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Is_active field is a boolean value\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  responseData.forEach(function(schedule) {",
+											"    pm.expect(schedule.is_active).to.be.a('boolean');",
+											"  });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -500,7 +1189,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -531,6 +1220,62 @@
 						},
 						{
 							"name": "Get schedules by id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content-Type header is application/json\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+											"});",
+											"",
+											"",
+											"pm.test(\"Validate the schedule object\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('array');",
+											"  responseData.forEach(function(schedule) {",
+											"    pm.expect(schedule).to.be.an('object');",
+											"    pm.expect(schedule.id).to.be.a('number');",
+											"    pm.expect(schedule.vetid).to.be.a('number');",
+											"    pm.expect(schedule.day).to.be.a('string');",
+											"    pm.expect(schedule.start_time).to.be.a('string');",
+											"    pm.expect(schedule.end_time).to.be.a('string');",
+											"    pm.expect(schedule.is_active).to.be.a('boolean');",
+											"    pm.expect(schedule.name).to.be.a('string');",
+											"  });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Day is a valid day of the week\", function () {",
+											"    const responseData = pm.response.json();",
+											"    ",
+											"    pm.expect(responseData).to.be.an('array');",
+											"    responseData.forEach(function(schedule) {",
+											"        pm.expect(schedule.day).to.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/);",
+											"    });",
+											"});",
+											"",
+											"",
+											"pm.test(\"Start_time and end_time are in valid time format\", function () {",
+											"  const responseData = pm.response.json();",
+											"  ",
+											"  pm.expect(responseData).to.be.an('array');",
+											"  responseData.forEach(function(schedule) {",
+											"    pm.expect(schedule.start_time).to.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, \"Start_time should be in valid time format\");",
+											"    pm.expect(schedule.end_time).to.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, \"End_time should be in valid time format\");",
+											"  });",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -542,7 +1287,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+										"value": "{{token}}",
 										"type": "text"
 									}
 								],
@@ -576,6 +1321,57 @@
 				},
 				{
 					"name": "Get available slots",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - date and slots\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(schedule) {",
+									"        pm.expect(schedule).to.have.property('date');",
+									"        pm.expect(schedule).to.have.property('slots').that.is.an('array');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Date is in a valid date format\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(item) {",
+									"        pm.expect(item.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Each slot contains a valid start time\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(slot => {",
+									"        pm.expect(slot.start).to.exist;",
+									"        pm.expect(slot.start).to.be.a('string');",
+									"        // Add more specific checks for start time format if needed",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -587,7 +1383,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -627,6 +1423,55 @@
 				},
 				{
 					"name": "Get vets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the Content-Type header set to application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Array structure and elements validation\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+									"    ",
+									"    responseData.forEach(function(vet) {",
+									"        pm.expect(vet).to.be.an('object');",
+									"        pm.expect(vet.userid).to.be.a('number');",
+									"        pm.expect(vet.name).to.be.a('string');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Userid is a non-negative integer\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    responseData.forEach(function(item) {",
+									"        pm.expect(item.userid).to.be.a('number').and.to.be.at.least(0);",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Name is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    responseData.forEach(function(vet) {",
+									"        pm.expect(vet.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -638,7 +1483,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0MjcyMTc1MiwiZXhwIjoxNzQyNzY0OTUyfQ.VuBYBBydUx-lPh0WPOF8cBWVwxEzLCKkeu8dCL22Qt4",
+								"value": "{{token}}",
 								"type": "text"
 							}
 						],
@@ -667,6 +1512,35 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImF4ZXdvb2QiLCJyb2xlIjoiQWRtaW4iLCJ1c2VyaWQiOjMsImlhdCI6MTc0NTczODg4MSwiZXhwIjoxNzQ1NzgyMDgxfQ.ihhoYOy-IBPKdqvBAnl7EziJrQa6_o8gJxs5HtLxd5I",
+			"type": "default"
 		}
 	]
 }

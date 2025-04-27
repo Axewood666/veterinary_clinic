@@ -1,4 +1,5 @@
 const { Users, VetSchedules, Pets } = require('../models');
+const _ = require('lodash')
 
 exports.getVetSchedules = async (req, res) => {
     const vetSchedules = await VetSchedules.getAllWithRelations();

@@ -1,4 +1,3 @@
-const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 
 const { Users, invitation_token } = require('../models');
@@ -38,7 +37,17 @@ exports.register = async (req, res) => {
             role: "Client"
         });
 
-        const token = jwt.sign({ username, role, userid: newUser.userid }, JWT_SECRET, { expiresIn: '12h' });
+        if (!newUser?.length) {
+            throw new Error('Failed');
+        }
+        const token = jwt.sign({ username, role: newUser.role, userid: newUser.userid }, JWT_SECRET, { expiresIn: '12h' });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
 
         res.status(201).json({
             username: newUser.username,
@@ -66,11 +75,23 @@ exports.login = async (req, res) => {
 
         const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, JWT_SECRET, { expiresIn: '12h' });
 
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+
         return res.json({ token });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
+};
+
+exports.logout = (req, res) => {
+    res.clearCookie('token');
+    res.json({ message: 'Logged out' });
 };
 
 exports.sendInvite = async (req, res) => {
@@ -161,4 +182,8 @@ exports.registerByInvite = async (req, res) => {
             message: "Iternal server error: " + error.message
         });
     }
+}
+
+exports.getTokenData = async (req, res) => {
+    res.status(200).json({ user: req.user })
 }

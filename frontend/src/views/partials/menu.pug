@@ -1,7 +1,26 @@
 nav
-  ul
-    li: a(href="/") Главная
-    li: a(href="/pets") Питомцы
-    li: a(href="/appointments") Записи
-    li: a(href="/profile") Профиль
-    li: a(href="/logout") Выйти
+  .nav-container
+    .logo
+      a(href="/" class="main-link") Axewood
+    ul.nav-list
+      if user
+        if user.role === 'Admin'
+          li: a(href="/admin/clients" class="nav-link") Admin panel
+        if user.role === 'Vet'
+          li: a(href="/appointments" class="nav-link") Appointments
+          li: a(href="/schedules" class="nav-link") Schedules
+        if user.role === 'Manager'
+          li: a(href="/admin/clients" class="nav-link") Admin panel
+        if user.role === 'Client'
+          li: a(href="/pets" class="nav-link") Pets
+          li: a(href="/appointments" class="nav-link") Appointments
+          li: a(href="/profile" class="nav-link") Profile
+    .buttons  
+      if user
+        button.logout(id="logout-link") Logout
+      else
+        button.signin(id="signin-button") Login
+        button.registration(id="signup-button") Registration
+  script.
+    window.BACKEND_URL = '!{process.env.BACKEND_URL}';      
+  script(src="/js/menu.js")

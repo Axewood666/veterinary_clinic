@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title Admin Panel | #{title}
+    link(rel="stylesheet" href="/css/admin.css")
+    block head
+  body
+    include ../partials/admin-header
+    main
+      block content
+    block scripts

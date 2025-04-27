@@ -1,5 +1,41 @@
 extends ../layouts/main.pug
 
 block content
-  h1 Добро пожаловать в ветеринарную клинику!
-  p Здесь вы можете управлять своими питомцами, записями и профилем.
+  .hero-section
+    .hero-content
+      h1.hero-title Welcome to Axewood Veterinary Clinic!
+      p.hero-subtitle Caring for your pets as if they were our own
+      .hero-actions
+        a.button.primary(href="/services") Our Services
+        a.button.secondary(href="/contact") Contact Us
+        a.button.primary(href="/appointment") Book Appointment
+
+  section.about-section
+    .about-container
+      .about-content
+        h2 About Our Clinic
+        p We provide compassionate and comprehensive veterinary care with state-of-the-art facilities and a team of experienced professionals dedicated to your pet's wellbeing.
+      .about-image
+        img(src="https://cs13.pikabu.ru/post_img/2021/01/28/5/16118162674831891.jpg" alt="Our Veterinary Clinic")
+
+  section.services-section
+    h2.section-title Our Top Services
+    .services-grid
+      a.service-card(href="/services")
+        h3.service-title Dental Care
+        p.service-description Professional teeth cleaning and oral health maintenance
+      a.service-card(href="/services")
+        h3.service-title Consultations
+        p.service-description Comprehensive health assessments and personalized treatment plans
+      a.service-card(href="/services")
+        h3.service-title Vaccinations
+        p.service-description Essential immunizations for your pet's health
+      a.service-card(href="/services")
+        h3.service-title Surgery
+        p.service-description Advanced surgical procedures for various conditions
+      a.service-card(href="/services")
+        h3.service-title Nutrition Advice
+        p.service-description Customized nutrition plans to meet specific health needs
+      a.service-card(href="/services")
+        h3.service-title Grooming
+        p.service-description Full grooming services for dogs and cats

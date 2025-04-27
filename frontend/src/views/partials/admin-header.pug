@@ -1,0 +1,14 @@
+header.admin-header
+  .logo: a(href="/" class="main-link") Axewood Admin
+  nav
+    ul
+      li: a(href="/admin/clients").active Clients
+      li: a(href="/admin/pets") Pets
+      li: a(href="/admin/appointments") Appointments
+      li: a(href="/users" class="nav-link") Users
+      li: a(href="/templates" class="nav-link") Mail templates
+      li: a(href="/schedules" class="nav-link") Schedules
+  .user-menu
+    span.username #{user.name}
+    button.logout(id="logout-link") Logout
+  script(src="/js/menu.js")
