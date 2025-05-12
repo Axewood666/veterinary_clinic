@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 
-const { Users, invitation_token } = require('../models');
+const { Users, invitation_token, UserBan } = require('../models');
 const { sendInvitationEmail } = require("../services/mailerService");
 
 const jwt = require('jsonwebtoken');
@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET
 
 exports.getUsers = async (req, res) => {
     try {
-        const users = await Users.getAll();
+        const users = await Users.getAll()
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -71,6 +71,11 @@ exports.login = async (req, res) => {
         const isPasswordValid = bcrypt.compareSync(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid username or password' });
+        }
+
+        const activeBan = await UserBan.getByUserId(user.userid)
+        if (activeBan) {
+            res.status(403).json({ message: `You was banned. Reason: ${activeBan.reason}` });
         }
 
         const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, JWT_SECRET, { expiresIn: '12h' });
@@ -186,4 +191,32 @@ exports.registerByInvite = async (req, res) => {
 
 exports.getTokenData = async (req, res) => {
     res.status(200).json({ user: req.user })
+}
+
+exports.banUser = async (req, res) => {
+    const { userid, reason } = req.body;
+    if (!userid) {
+        return res.status(400).json({ message: 'Userid is required' })
+    }
+    if (!reason) {
+        reason = "Po prikolu"
+    }
+    try {
+        const user = await Users.getById(userid);
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        };
+
+        await UserBan.create({
+            userid,
+            reason,
+            banned_by: req.user.userid
+        });
+
+        return res.status(200).json({ message: 'User was banned' });
+    } catch (error) {
+        res.status(500).json({
+            message: "Iternal server error: " + error.message
+        });
+    }
 }

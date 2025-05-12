@@ -47,7 +47,7 @@ const VetSchedules = {
         const appointments = await db('appointments')
             .whereRaw('date::date >= ?', [currentDate.toISOString()])
             .andWhereRaw('date::date <= ?', [endOfNextWeek.toISOString().split('T')[0]])
-            .andWhere({ vetid: vetId })
+            .andWhere({ vetId })
             .whereIn('status', ['scheduled', 'accepted']);
 
         const availableSlots = [];

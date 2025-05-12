@@ -1,16 +1,23 @@
 const express = require('express');
-const authRoutes = require('./authRoutes');
-const clientRoutes = require('./clientRoutes');
-const petRoutes = require('./petRoutes');
-const appointmentRoutes = require('./appointmentRoutes');
-const vetSchedulesRoutes = require('./vetRoutes');
-
 const router = express.Router();
 
-router.use(authRoutes);
-router.use(clientRoutes);
-router.use(petRoutes);
-router.use(appointmentRoutes);
-router.use(vetSchedulesRoutes);
+const authRoutes = require('./authRoutes');
+const vetRoutes = require('./vetRoutes');
+const petRoutes = require('./petRoutes');
+const clientRoutes = require('./clientRoutes');
+const appointmentRoutes = require('./appointmentRoutes');
+const adminRoutes = require('./adminRoutes');
+
+router.use('/auth', authRoutes);
+
+router.use('/vets', vetRoutes);
+
+router.use('/pets', petRoutes);
+
+router.use('/clients', clientRoutes);
+
+router.use('/appointments', appointmentRoutes);
+
+router.use('/admin', adminRoutes);
 
 module.exports = router;

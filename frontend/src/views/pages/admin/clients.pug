@@ -1,4 +1,4 @@
-extends ../layouts/admin.pug
+extends ../../layouts/admin.pug
 
 block content
   .clients-page
@@ -60,7 +60,7 @@ block content
 
 block scripts
   script.
-    const BACKEND_URL = '!{backEndUrl}';
+    const BACKEND_URL = '!{backEndUrl}' || window.location.origin.replace(':3000', ':3001');
     
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('addClientBtn')?.addEventListener('click', showAddClientModal);

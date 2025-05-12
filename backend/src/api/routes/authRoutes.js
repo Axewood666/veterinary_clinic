@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const { registerValidationRules, loginValidationRules, sendInviteValidationRules, registerByInviteValidationRules } = require('../validators/authValidator');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { isAuthenticated, authorize } = require('../middlewares/authMiddleware');
 const validateResult = require('../middlewares/validateResult');
 
-router.get('/users', authenticate, authorize(["Admin"]), userController.getUsers);
-router.get('/me', authenticate, userController.getTokenData);
-router.post('/auth/register', registerValidationRules(), validateResult, userController.register);
-router.post('/auth/register/invite', registerByInviteValidationRules(), validateResult, userController.registerByInvite);
-router.post('/auth/login', loginValidationRules(), validateResult, userController.login);
-router.post('/auth/logout', authenticate, userController.logout)
-router.post('/auth/sendInvite', authenticate, authorize(["Admin"]), sendInviteValidationRules(), validateResult, userController.sendInvite);
+router.get('/users', isAuthenticated, authorize(["admin"]), userController.getUsers);
+router.get('/me', isAuthenticated, userController.getTokenData);
+router.post('/register', registerValidationRules(), validateResult, userController.register);
+router.post('/register/invite', registerByInviteValidationRules(), validateResult, userController.registerByInvite);
+router.post('/login', loginValidationRules(), validateResult, userController.login);
+router.post('/logout', isAuthenticated, userController.logout);
+router.post('/sendInvite', isAuthenticated, authorize(["admin"]), sendInviteValidationRules(), validateResult, userController.sendInvite);
+router.post('/ban-user', isAuthenticated, authorize(["admin"]), userController.banUser);
 
 module.exports = router;

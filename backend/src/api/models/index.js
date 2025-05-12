@@ -4,6 +4,7 @@ const Appointments = require('./appointments');
 const VetSchedules = require('./vetShedules');
 const invitation_token = require('./invite_tokens');
 const email_template = require('./email_template');
+const UserBan = require('./user_ban');
 
 module.exports = {
     Users,
@@ -11,5 +12,6 @@ module.exports = {
     Appointments,
     VetSchedules,
     invitation_token,
-    email_template
+    email_template,
+    UserBan
 };

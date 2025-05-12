@@ -1,12 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const petController = require('../controllers/petController');
-const { authenticate, authorize } = require('../middlewares/auth');
-const { petAddValidator } = require('../validators/petValidator');
-const validateResult = require('../middlewares/validateResult');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
-router.get('/clients/:clientId/pets', authenticate, petController.getClientPets);
-router.get('/pets', authenticate, authorize(['Admin', 'Vet', 'Manager']), petController.getAllPets);
-router.post('/clients/:clientId/pets', authenticate, petAddValidator(), validateResult, petController.addPet);
+// Получение списка всех питомцев
+router.get('/', isAuthenticated, petController.getAllPets);
+
+// Получение питомцев с фильтрацией
+router.get('/filter', isAuthenticated, petController.filterPets);
+
+// Получение данных конкретного питомца
+router.get('/:id', isAuthenticated, petController.getPetById);
+
+// Получение списка приемов питомца
+router.get('/:id/appointments', isAuthenticated, petController.getPetAppointments);
+
+// Создание нового питомца
+router.post('/', isAuthenticated, petController.createPet);
+
+// Обновление данных питомца
+router.put('/:id', isAuthenticated, petController.updatePet);
+
+// Удаление питомца (только для админа)
+router.delete('/:id', isAuthenticated, isAdmin, petController.deletePet);
 
 module.exports = router;

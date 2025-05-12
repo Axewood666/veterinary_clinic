@@ -1,40 +1,57 @@
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const dotenv = require('dotenv');
+
+// Загрузка переменных окружения
+dotenv.config();
+
 const app = express();
 
-app.set('views', path.join(__dirname, 'src', 'views'));
+// Настройка шаблонизатора
 app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'src/views'));
 
-const cookieParser = require('cookie-parser');
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'src/public')));
 
-app.use(express.json())
-app.use(express.static(path.join(__dirname, 'src', 'public')));
+app.use((req, res, next) => {
+    res.locals.errors = [];
+    res.locals.success = [];
 
-const logger = require('./src/middlewares/logger');
-app.use(logger);
+    res.addError = (message) => {
+        res.locals.errors.push(message);
+    };
 
-const fetchUser = require('./src/middlewares/fetchUser')
-app.use(fetchUser)
+    res.addSuccess = (message) => {
+        res.locals.success.push(message);
+    };
 
-const routes = require('./src/routes');
-app.use('/', routes);
+    next();
+});
+
+const fetchUser = require('./src/middlewares/fetchUser');
+app.use(fetchUser);
+
+app.use(require('./src/routes/index'));
 
 app.use((err, req, res, next) => {
-    console.error('Error:', err.stack);
-
-    res.status(err.status || 500).render('pages/error', {
-        message: err.message || 'An unexpected error occurred',
-        error: process.env.NODE_ENV === 'development' ? err : null,
-        user: req.user
+    console.error(err.stack);
+    res.status(500).render('pages/error', {
+        title: 'Ошибка',
+        message: 'Что-то пошло не так!',
+        error: err
     });
 });
 
-app.use((req, res, next) => {
+app.use((req, res) => {
     res.status(404).render('pages/error', {
-        message: 'Page Not Found',
-        error: null,
-        user: req.user
+        title: 'Страница не найдена',
+        message: 'Страница не найдена',
+        error: { message: 'Запрашиваемая страница не существует' }
     });
 });
 

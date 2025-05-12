@@ -1,6 +1,6 @@
-module.exports = (allowedRoles) => (req, res, next) => {
+module.exports = (allowedRoles, redirectUrl = '/login') => (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
-        return res.status(403).json({ message: 'Forbidden: Access is denied' });
+        return res.redirect(redirectUrl);
     }
     next();
 };

@@ -1,0 +1,38 @@
+extends ../../layouts/admin.pug
+
+block content
+  include ../../partials/ban-modal.pug
+  .clients-page
+    .page-header
+      h1 Accounts Management
+
+    if users.length > 0
+      .clients-container
+        .clients-list
+          table.clients-table
+            thead
+              tr
+                th ID
+                th Username
+                th Role
+                th Email
+                th Phone number
+                th name
+                th Banned
+            tbody
+              each user in users
+                tr(data-userid=user.userid)
+                  td= user.userid
+                  td= user.username
+                  td= user.email
+                  td= user.name
+                  td= user.phoneNumber
+                  td= user.name
+                  td= user.isbanned
+                  td
+                    button.ban-btn(data-userid=user.userid) Ban hammer
+    else
+      .no-clients
+        p No clients found
+  script.
+    window.BACKEND_URL = '#{process.env.BACKEND_URL}'

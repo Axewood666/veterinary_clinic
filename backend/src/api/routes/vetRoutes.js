@@ -1,12 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-const vetSchedulesController = require('../controllers/vetController');
-const { authenticate, authorize } = require('../middlewares/auth');
+const vetController = require('../controllers/vetController');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
-router.get('/vets/shedules', authenticate, authorize(['Vet', 'Manager', 'Admin']), vetSchedulesController.getVetSchedules);
-router.get('/vets/shedules/:vetid', authenticate, authorize(['Vet', 'Manager', 'Admin']), vetSchedulesController.getVetScheduleById);
-router.get('/vets/shedules/:vetid/slots', authenticate, vetSchedulesController.getAvailableSlots);
-router.get('/vets', authenticate, vetSchedulesController.getVeterinarians);
+router.get('/schedules', isAuthenticated, vetController.getVetSchedules);
+router.get('/schedules/:vetid', isAuthenticated, vetController.getVetScheduleById);
+router.get('/schedules/:vetid/slots', isAuthenticated, vetController.getAvailableSlots);
+router.get('/list', isAuthenticated, vetController.getVeterinarians);
+
+router.get('/', isAuthenticated, vetController.getAllVets);
+router.get('/:id', isAuthenticated, vetController.getVetById);
+router.get('/:id/appointments', isAuthenticated, vetController.getVetAppointments);
+router.post('/:id/toggle-status', isAuthenticated, isAdmin, vetController.toggleVetStatus);
+
+router.post('/', isAuthenticated, isAdmin, vetController.createVet);
+router.put('/:id', isAuthenticated, isAdmin, vetController.updateVet);
 
 module.exports = router;

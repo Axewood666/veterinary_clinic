@@ -1,0 +1,213 @@
+extends ../../layouts/admin
+
+block content
+  .settings-container
+    h1 Настройки системы
+
+    .settings-grid
+      // Общие настройки
+      .settings-section
+        h2 Общие настройки
+        form#generalSettingsForm
+          .form-group
+            label(for="clinicName") Название клиники
+            input#clinicName(type="text" name="clinicName" value=settings.clinicName)
+          
+          .form-group
+            label(for="clinicAddress") Адрес клиники
+            input#clinicAddress(type="text" name="clinicAddress" value=settings.clinicAddress)
+          
+          .form-group
+            label(for="clinicPhone") Телефон клиники
+            input#clinicPhone(type="tel" name="clinicPhone" value=settings.clinicPhone)
+          
+          .form-group
+            label(for="clinicEmail") Email клиники
+            input#clinicEmail(type="email" name="clinicEmail" value=settings.clinicEmail)
+          
+          button.btn.btn-primary(type="submit") Сохранить изменения
+
+      // Настройки рабочего времени
+      .settings-section
+        h2 Рабочее время
+        form#workingHoursForm
+          each day in ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+            .form-group
+              label= day
+              .time-range
+                input(type="time" name=`${day.toLowerCase()}_start` value=settings.workingHours[day.toLowerCase()].start)
+                span до
+                input(type="time" name=`${day.toLowerCase()}_end` value=settings.workingHours[day.toLowerCase()].end)
+          
+          button.btn.btn-primary(type="submit") Сохранить изменения
+
+      // Настройки уведомлений
+      .settings-section
+        h2 Настройки уведомлений
+        form#notificationSettingsForm
+          .form-group
+            label.checkbox-label
+              input(type="checkbox" name="emailNotifications" checked=settings.notifications.email)
+              | Email уведомления
+          
+          .form-group
+            label.checkbox-label
+              input(type="checkbox" name="smsNotifications" checked=settings.notifications.sms)
+              | SMS уведомления
+          
+          .form-group
+            label(for="notificationTemplate") Шаблон уведомлений
+            textarea#notificationTemplate(name="notificationTemplate" rows="4")= settings.notifications.template
+          
+          button.btn.btn-primary(type="submit") Сохранить изменения
+
+      // Настройки безопасности
+      .settings-section
+        h2 Безопасность
+        form#securitySettingsForm
+          .form-group
+            label(for="sessionTimeout") Таймаут сессии (минуты)
+            input#sessionTimeout(type="number" name="sessionTimeout" value=settings.security.sessionTimeout)
+          
+          .form-group
+            label(for="maxLoginAttempts") Максимальное количество попыток входа
+            input#maxLoginAttempts(type="number" name="maxLoginAttempts" value=settings.security.maxLoginAttempts)
+          
+          .form-group
+            label.checkbox-label
+              input(type="checkbox" name="twoFactorAuth" checked=settings.security.twoFactorAuth)
+              | Двухфакторная аутентификация
+          
+          button.btn.btn-primary(type="submit") Сохранить изменения
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Обработка формы общих настроек
+      document.getElementById('generalSettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/admin/settings/general`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              clinicName: document.getElementById('clinicName').value,
+              clinicAddress: document.getElementById('clinicAddress').value,
+              clinicPhone: document.getElementById('clinicPhone').value,
+              clinicEmail: document.getElementById('clinicEmail').value
+            })
+          });
+
+          if (response.ok) {
+            showNotification('Настройки успешно сохранены', 'success');
+          } else {
+            throw new Error('Ошибка при сохранении настроек');
+          }
+        } catch (error) {
+          showNotification(error.message, 'error');
+        }
+      });
+
+      // Обработка формы рабочего времени
+      document.getElementById('workingHoursForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const workingHours = {};
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        
+        days.forEach(day => {
+          workingHours[day] = {
+            start: this[`${day}_start`].value,
+            end: this[`${day}_end`].value
+          };
+        });
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/admin/settings/working-hours`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ workingHours })
+          });
+
+          if (response.ok) {
+            showNotification('Рабочее время успешно обновлено', 'success');
+          } else {
+            throw new Error('Ошибка при обновлении рабочего времени');
+          }
+        } catch (error) {
+          showNotification(error.message, 'error');
+        }
+      });
+
+      // Обработка формы настроек уведомлений
+      document.getElementById('notificationSettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/admin/settings/notifications`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              email: this.emailNotifications.checked,
+              sms: this.smsNotifications.checked,
+              template: this.notificationTemplate.value
+            })
+          });
+
+          if (response.ok) {
+            showNotification('Настройки уведомлений успешно обновлены', 'success');
+          } else {
+            throw new Error('Ошибка при обновлении настроек уведомлений');
+          }
+        } catch (error) {
+          showNotification(error.message, 'error');
+        }
+      });
+
+      // Обработка формы настроек безопасности
+      document.getElementById('securitySettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/admin/settings/security`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              sessionTimeout: parseInt(this.sessionTimeout.value),
+              maxLoginAttempts: parseInt(this.maxLoginAttempts.value),
+              twoFactorAuth: this.twoFactorAuth.checked
+            })
+          });
+
+          if (response.ok) {
+            showNotification('Настройки безопасности успешно обновлены', 'success');
+          } else {
+            throw new Error('Ошибка при обновлении настроек безопасности');
+          }
+        } catch (error) {
+          showNotification(error.message, 'error');
+        }
+      });
+
+      // Функция для отображения уведомлений
+      function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+    }); 

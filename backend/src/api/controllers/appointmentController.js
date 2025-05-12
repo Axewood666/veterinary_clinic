@@ -1,29 +1,267 @@
 const { Users, Pets, Appointments, VetSchedules } = require('../models');
-const { validationResult } = require('express-validator');
 const _ = require('lodash');
+const db = require('../../config/db');
+const logger = require('../../utils/logger');
+const APIError = require('../../utils/APIError');
 
-exports.getAppointments = async (req, res) => {
+exports.getAllAppointments = async (req, res, next) => {
+    try {
+        logger.debug('Получение списка всех приемов');
+
+        const appointments = await db('appointments')
+            .join('users as vets', 'appointments.vetId', 'vets.userid')
+            .join('users as clients', 'appointments.clientId', 'clients.userid')
+            .join('pets', 'appointments.petId', 'pets.petId')
+            .select(
+                'appointments.appointmentId',
+                'appointments.date',
+                'appointments.time',
+                'appointments.status',
+                'appointments.diagnosis',
+                'appointments.recommendations',
+                'vets.name as vetName',
+                'clients.name as clientName',
+                'pets.name as petName'
+            )
+            .orderBy('appointments.date', 'desc')
+            .orderBy('appointments.time', 'desc');
+
+        logger.info(`Получено ${appointments.length} приемов`);
+        res.json(appointments);
+    } catch (error) {
+        logger.error('Ошибка при получении всех приемов:', error);
+        next(APIError.internal('Не удалось получить список приемов', { originalError: error.message }));
+    }
+};
+
+exports.filterAppointments = async (req, res, next) => {
+    try {
+        const { status, vetId, clientId, date } = req.query;
+
+        logger.debug('Фильтрация приемов по параметрам:', { status, vetId, clientId, date });
+
+        let query = db('appointments')
+            .join('users as vets', 'appointments.vetId', 'vets.userid')
+            .join('users as clients', 'appointments.clientId', 'clients.userid')
+            .join('pets', 'appointments.petId', 'pets.petId')
+            .select(
+                'appointments.appointmentId',
+                'appointments.date',
+                'appointments.time',
+                'appointments.status',
+                'appointments.diagnosis',
+                'appointments.recommendations',
+                'vets.name as vetName',
+                'clients.name as clientName',
+                'pets.name as petName'
+            );
+
+        if (status) {
+            query = query.where('appointments.status', status);
+        }
+
+        if (vetId) {
+            query = query.where('appointments.vetId', vetId);
+        }
+
+        if (clientId) {
+            query = query.where('appointments.clientId', clientId);
+        }
+
+        if (date) {
+            query = query.where('appointments.date', date);
+        }
+
+        const appointments = await query
+            .orderBy('appointments.date', 'desc')
+            .orderBy('appointments.time', 'desc');
+
+        logger.info(`Найдено ${appointments.length} приемов по фильтрам`);
+        res.json(appointments);
+    } catch (error) {
+        logger.error('Ошибка при фильтрации приемов:', error);
+        next(APIError.internal('Не удалось получить отфильтрованный список приемов', { originalError: error.message }));
+    }
+};
+
+exports.getAppointmentById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        logger.debug(`Получение приема по ID: ${id}`);
+
+        const appointment = await db('appointments')
+            .join('users as vets', 'appointments.vetId', 'vets.userid')
+            .join('users as clients', 'appointments.clientId', 'clients.userid')
+            .join('pets', 'appointments.petId', 'pets.petId')
+            .where('appointments.appointmentId', id)
+            .select(
+                'appointments.appointmentId',
+                'appointments.date',
+                'appointments.time',
+                'appointments.status',
+                'appointments.diagnosis',
+                'appointments.recommendations',
+                'appointments.comments',
+                'vets.name as vetName',
+                'vets.userid as vetId',
+                'clients.name as clientName',
+                'clients.userid as clientId',
+                'pets.name as petName',
+                'pets.petId as petId'
+            )
+            .first();
+
+        if (!appointment) {
+            logger.warn(`Прием с ID ${id} не найден`);
+            throw APIError.notFound(`Прием с ID ${id} не найден`);
+        }
+
+        logger.info(`Получены данные приема #${id}`);
+        res.json(appointment);
+    } catch (error) {
+        if (error instanceof APIError) {
+            next(error);
+        } else {
+            logger.error(`Ошибка при получении приема по ID ${req.params.id}:`, error);
+            next(APIError.internal('Не удалось получить данные приема', { originalError: error.message }));
+        }
+    }
+};
+
+// Метод для отмены приема
+exports.cancelAppointment = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        logger.debug(`Отмена приема #${id} пользователем ${req.user.userid}`);
+
+        // Проверяем, существует ли прием
+        const appointment = await db('appointments')
+            .where('appointmentId', id)
+            .first();
+
+        if (!appointment) {
+            logger.warn(`Попытка отменить несуществующий прием #${id}`);
+            throw APIError.notFound(`Прием с ID ${id} не найден`);
+        }
+
+        // Проверяем, можно ли отменить прием
+        if (appointment.status === 'completed') {
+            logger.warn(`Попытка отменить завершенный прием #${id}`);
+            throw APIError.badRequest('Нельзя отменить завершенный прием');
+        }
+
+        if (appointment.status === 'cancelled') {
+            logger.warn(`Попытка отменить уже отмененный прием #${id}`);
+            throw APIError.badRequest('Прием уже отменен');
+        }
+
+        // Обновляем статус приема
+        await db('appointments')
+            .where('appointmentId', id)
+            .update({
+                status: 'cancelled',
+                cancelledAt: new Date(),
+                cancelledBy: req.user.userid
+            });
+
+        logger.info(`Прием #${id} успешно отменен пользователем ${req.user.userid}`);
+        res.json({
+            success: true,
+            message: 'Прием успешно отменен'
+        });
+    } catch (error) {
+        if (error instanceof APIError) {
+            next(error);
+        } else {
+            logger.error(`Ошибка при отмене приема #${req.params.id}:`, error);
+            next(APIError.internal('Не удалось отменить прием', { originalError: error.message }));
+        }
+    }
+};
+
+// Метод для завершения приема
+exports.completeAppointment = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { diagnosis, recommendations } = req.body;
+
+        logger.debug(`Завершение приема #${id} пользователем ${req.user.userid}`, {
+            diagnosis: diagnosis ? 'указан' : 'не указан',
+            recommendations: recommendations ? 'указаны' : 'не указаны'
+        });
+
+        // Проверяем, существует ли прием
+        const appointment = await db('appointments')
+            .where('appointmentId', id)
+            .first();
+
+        if (!appointment) {
+            logger.warn(`Попытка завершить несуществующий прием #${id}`);
+            throw APIError.notFound(`Прием с ID ${id} не найден`);
+        }
+
+        // Проверяем, можно ли завершить прием
+        if (appointment.status === 'completed') {
+            logger.warn(`Попытка завершить уже завершенный прием #${id}`);
+            throw APIError.badRequest('Прием уже завершен');
+        }
+
+        if (appointment.status === 'cancelled') {
+            logger.warn(`Попытка завершить отмененный прием #${id}`);
+            throw APIError.badRequest('Нельзя завершить отмененный прием');
+        }
+
+        // Обновляем данные приема
+        await db('appointments')
+            .where('appointmentId', id)
+            .update({
+                status: 'completed',
+                completedAt: new Date(),
+                diagnosis: diagnosis || appointment.diagnosis,
+                recommendations: recommendations || appointment.recommendations
+            });
+
+        logger.info(`Прием #${id} успешно завершен пользователем ${req.user.userid}`);
+        res.json({
+            success: true,
+            message: 'Прием успешно завершен'
+        });
+    } catch (error) {
+        if (error instanceof APIError) {
+            next(error);
+        } else {
+            logger.error(`Ошибка при завершении приема #${req.params.id}:`, error);
+            next(APIError.internal('Не удалось завершить прием', { originalError: error.message }));
+        }
+    }
+};
+
+exports.getAppointments = async (req, res, next) => {
     try {
         const userid = req.params.userid;
         const user = req.user;
         const status = req.query.status;
 
+        logger.debug(`Получение приемов для пользователя ${userid}`, { status });
+
         if (user.role == 'Client' && user.userid != userid) {
-            return res.status(403).json({
-                message: 'You are not allowed to receive this client\'s appointments'
-            });
+            logger.warn(`Попытка пользователя ${user.userid} получить приемы другого клиента ${userid}`);
+            throw APIError.forbidden('У вас нет прав на просмотр приемов этого клиента');
         }
 
         const client = await Users.getById(userid);
         if (_.isEmpty(client)) {
-            return res.status(404).json({ message: 'Client not found' });
+            logger.warn(`Клиент ${userid} не найден`);
+            throw APIError.notFound('Клиент не найден');
         } else if (client.role != 'Client') {
-            return res.status(403).json({ message: 'This action is only allowed for clients accounts' });
+            logger.warn(`Попытка получить приемы для не-клиента ${userid}`);
+            throw APIError.badRequest('Действие доступно только для учетных записей клиентов');
         }
 
         const pets = await Pets.getAll().where({ userid });
         if (_.isEmpty(pets)) {
-            return res.status(404).json({ error: "No pets found" });
+            logger.warn(`У клиента ${userid} нет питомцев`);
+            throw APIError.notFound('У клиента нет питомцев');
         }
 
         let query = Appointments.getAllWithRelations()
@@ -35,9 +273,15 @@ exports.getAppointments = async (req, res) => {
         query = query.orderBy('appointments.date', 'asc');
 
         const appointments = await query;
+        logger.info(`Получено ${appointments.length} приемов для клиента ${userid}`);
         res.status(200).json(appointments);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    } catch (error) {
+        if (error instanceof APIError) {
+            next(error);
+        } else {
+            logger.error(`Ошибка при получении приемов для пользователя ${req.params.userid}:`, error);
+            next(APIError.internal('Не удалось получить список приемов', { originalError: error.message }));
+        }
     }
 };
 
@@ -96,7 +340,6 @@ exports.createAppointment = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-
 
 exports.acceptAppointment = async (req, res) => {
     try {

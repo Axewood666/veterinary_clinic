@@ -40,6 +40,12 @@ const Pet = {
                 'users.name as owner_name',
                 'users.email as owner_email'
             );
+    },
+
+    getByUserId(userid) {
+        return db('pets')
+            .where({ userid })
+            .select('*');
     }
 };
 
