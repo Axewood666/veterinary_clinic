@@ -1,0 +1,113 @@
+extends ../../layouts/main.pug
+
+block content
+  .auth-container
+    h2 Login
+    #serverErrorSummary.error-summary(style="display: none")
+      p.error-title Please fix the following errors:
+      ul#serverErrorList.error-list
+    
+    if message
+      #serverErrorSummary.error-summary(style="display: block")
+        ul#serverErrorList.error-list
+          li= message
+    
+    form#loginForm.auth-form
+      .form-group
+        label(for="username") Username
+        input(type="text", name="username", id="username", required, value=username || '')
+        .invalid-feedback#usernameError
+      
+      .form-group
+        label(for="password") Password
+        input(type="password", name="password", id="password", required)
+        .invalid-feedback#passwordError
+
+      .form-group.checkbox
+        input(type="checkbox", id="remember", name="remember")
+        label(for="remember") Remember me
+      
+      button.auth-button(type="submit") Login
+    
+    .auth-link
+      span Don't have an account? 
+      a(href="/auth/register") Register
+
+  script.
+    const backendEndpoint = '/auth/login';
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resetErrors();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      try {
+        const response = await fetch(backendEndpoint, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          displayErrors(errorData);
+          return;
+        }
+        
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Login error:', error);
+        displayGenericError();
+      }
+    });
+
+    function resetErrors() {
+      document.getElementById('serverErrorSummary').style.display = 'none';
+      document.getElementById('serverErrorList').innerHTML = '';
+      
+      document.getElementById('usernameError').textContent = '';
+      document.getElementById('passwordError').textContent = '';
+      
+      document.getElementById('username').classList.remove('is-invalid');
+      document.getElementById('password').classList.remove('is-invalid');
+    }
+
+    function displayErrors(errorData) {
+      const serverErrorSummary = document.getElementById('serverErrorSummary');
+      const serverErrorList = document.getElementById('serverErrorList');
+      
+      if (errorData.message) {
+        serverErrorSummary.style.display = 'block';
+        serverErrorList.innerHTML = `<li>${errorData.message}</li>`;
+      }
+      
+      if (errorData.errors) {
+        serverErrorSummary.style.display = 'block';
+        
+        errorData.errors.forEach(error => {
+          const li = document.createElement('li');
+          li.textContent = error.msg;
+          serverErrorList.appendChild(li);
+          
+          const fieldError = document.getElementById(`${error.path}Error`);
+          if (fieldError) {
+            fieldError.textContent = error.msg;
+            document.getElementById(error.path).classList.add('is-invalid');
+          }
+        });
+      }
+    }
+
+    function displayGenericError() {
+      const serverErrorSummary = document.getElementById('serverErrorSummary');
+      const serverErrorList = document.getElementById('serverErrorList');
+      
+      serverErrorSummary.style.display = 'block';
+      serverErrorList.innerHTML = '<li>Login failed. Please try again.</li>';
+    }

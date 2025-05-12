@@ -1,0 +1,150 @@
+extends ../layouts/default.pug
+
+block content
+  .container.appointment-page
+    h1.page-title Запись на прием
+    
+    if error
+      .alert.alert-danger
+        p= error
+    
+    .appointment-form
+      form(action="/api/appointments" method="POST")
+        .row
+          h3 Информация о владельце
+          .col-md-6
+            .form-group
+              label(for="owner_first_name") Имя владельца *
+              input.form-control#owner_first_name(
+                type="text" 
+                name="owner_first_name"
+                value=formData.owner_first_name || ''
+                required
+              )
+          .col-md-6
+            .form-group
+              label(for="owner_last_name") Фамилия владельца *
+              input.form-control#owner_last_name(
+                type="text" 
+                name="owner_last_name"
+                value=formData.owner_last_name || ''
+                required
+              )
+          .col-md-6
+            .form-group
+              label(for="owner_phone") Телефон владельца *
+              input.form-control#owner_phone(
+                type="tel" 
+                name="owner_phone"
+                value=formData.owner_phone || ''
+                required
+              )
+          .col-md-6
+            .form-group
+              label(for="owner_email") Email владельца
+              input.form-control#owner_email(
+                type="email" 
+                name="owner_email"
+                value=formData.owner_email || ''
+              )
+        
+        .row
+          h3 Информация о питомце
+          .col-md-6
+            .form-group
+              label(for="pet_name") Кличка питомца *
+              input.form-control#pet_name(
+                type="text" 
+                name="pet_name"
+                value=formData.pet_name || ''
+                required
+              )
+          .col-md-6
+            .form-group
+              label(for="pet_species") Вид животного *
+              select.form-control#pet_species(
+                name="pet_species"
+                required
+              )
+                option(value="" disabled selected) Выберите вид животного
+                option(value="Кошка" selected=formData.pet_species === 'Кошка') Кошка
+                option(value="Собака" selected=formData.pet_species === 'Собака') Собака
+                option(value="Грызун" selected=formData.pet_species === 'Грызун') Грызун
+                option(value="Птица" selected=formData.pet_species === 'Птица') Птица
+                option(value="Другое" selected=formData.pet_species === 'Другое') Другое
+          .col-md-6
+            .form-group
+              label(for="pet_age") Возраст питомца (лет)
+              input.form-control#pet_age(
+                type="number" 
+                name="pet_age"
+                value=formData.pet_age || ''
+                min="0"
+                step="0.1"
+              )
+        
+        .row
+          h3 Информация о приеме
+          .col-md-6
+            .form-group
+              label(for="vet_id") Выберите ветеринара *
+              select.form-control#vet_id(
+                name="vet_id"
+                required
+              )
+                option(value="" disabled selected) Выберите ветеринара
+                each vet in vets
+                  option(
+                    value=vet.id 
+                    selected=formData.vet_id == vet.id
+                  )= `${vet.last_name} ${vet.first_name} (${vet.specialization})`
+          .col-md-6
+            .form-group
+              label(for="appointment_date") Дата приема *
+              input.form-control#appointment_date(
+                type="date" 
+                name="appointment_date"
+                value=formData.appointment_date || ''
+                required
+                min=new Date().toISOString().split('T')[0]
+              )
+          .col-md-6
+            .form-group
+              label(for="appointment_time") Время приема *
+              select.form-control#appointment_time(
+                name="appointment_time"
+                required
+              )
+                option(value="" disabled selected) Выберите время
+                - let workStart = 9
+                - let workEnd = 18
+                if settings && settings.work_hours_start
+                  - workStart = parseInt(settings.work_hours_start)
+                if settings && settings.work_hours_end
+                  - workEnd = parseInt(settings.work_hours_end)
+                - for (let hour = workStart; hour < workEnd; hour++)
+                  - for (let minute of [0, 30])
+                    - const formattedHour = hour.toString().padStart(2, '0')
+                    - const formattedMinute = minute.toString().padStart(2, '0')
+                    - const timeString = `${formattedHour}:${formattedMinute}`
+                    option(
+                      value=timeString 
+                      selected=formData.appointment_time === timeString
+                    )= timeString
+          .col-md-12
+            .form-group
+              label(for="reason") Причина обращения *
+              textarea.form-control#reason(
+                name="reason"
+                rows="3"
+                required
+              )= formData.reason || ''
+        
+        .form-group.text-center.mt-4
+          button.btn.btn-primary.btn-lg(type="submit") Записаться на прием
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Код JavaScript для обработки формы...
+    }); 

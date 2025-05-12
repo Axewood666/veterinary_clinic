@@ -1,0 +1,99 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Veterinary Clinic - Admin Panel
+    link(rel="stylesheet", href="/css/admin.css")
+    block styles
+
+  body
+    .admin-layout
+      aside.sidebar
+        .sidebar-header
+          h1 Veterinary Clinic
+          p Admin Panel
+
+        nav.sidebar-nav
+          ul
+            li
+              a(href="/admin/dashboard", class=activePage === 'dashboard' ? 'active' : '')
+                i.fas.fa-chart-line
+                span Dashboard
+            li
+              a(href="/admin/vets", class=activePage === 'vets' ? 'active' : '')
+                i.fas.fa-user-md
+                span Veterinarians
+            li
+              a(href="/admin/clients", class=activePage === 'clients' ? 'active' : '')
+                i.fas.fa-users
+                span Clients
+            li
+              a(href="/admin/pets", class=activePage === 'pets' ? 'active' : '')
+                i.fas.fa-paw
+                span Pets
+            li
+              a(href="/admin/appointments", class=activePage === 'appointments' ? 'active' : '')
+                i.fas.fa-calendar-alt
+                span Appointments
+            li
+              a(href="/admin/settings", class=activePage === 'settings' ? 'active' : '')
+                i.fas.fa-cog
+                span Settings
+
+        .sidebar-footer
+          .user-info
+            img(src=user.avatar || '/images/default-avatar.png', alt="Avatar")
+            .user-details
+              span.user-name= user.name
+              span.user-role= user.role
+          button.logout(id="logout-link") Logout
+
+      main.main-content
+        header.main-header
+          .header-left
+            button.menu-toggle
+              i.fas.fa-bars
+            .breadcrumbs
+              block breadcrumbs
+
+          .header-right
+            .notifications
+              button.notifications-toggle
+                i.fas.fa-bell
+                if notificationsCount > 0
+                  span.notification-badge= notificationsCount
+              .notifications-dropdown
+                if notifications.length > 0
+                  each notification in notifications
+                    .notification-item(class=notification.read ? 'read' : '')
+                      .notification-icon
+                        i(class=notification.icon)
+                      .notification-content
+                        .notification-title= notification.title
+                        .notification-text= notification.text
+                        .notification-time= notification.time
+                else
+                  .notification-empty
+                    p No new notifications
+
+        .content-wrapper
+          block content
+
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js")
+    script.
+      document.querySelector('.menu-toggle')?.addEventListener('click', function() {
+        document.querySelector('.admin-layout').classList.toggle('sidebar-collapsed');
+      });
+
+      document.querySelector('.notifications-toggle')?.addEventListener('click', function() {
+        document.querySelector('.notifications-dropdown').classList.toggle('active');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.notifications')) {
+          document.querySelector('.notifications-dropdown')?.classList.remove('active');
+        }
+      });
+    script(src="/js/menu.js")
+    block scripts

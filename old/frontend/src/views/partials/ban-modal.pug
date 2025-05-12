@@ -1,0 +1,13 @@
+#banModal.modal
+  .modal-content
+    h2 Ban User
+    form#banForm
+      input(type="hidden" id="banUserId")
+      .form-group
+        label(for="banReason") Reason:
+        textarea(id="banReason" required)
+      .modal-actions
+        button.cancel-btn(type="button") Cancel
+        button.ban-btn(type="submit") Confirm Ban
+
+script(src="/js/banUser.js")

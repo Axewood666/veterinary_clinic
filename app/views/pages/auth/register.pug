@@ -1,0 +1,146 @@
+extends ../../layouts/main.pug
+
+block content
+  .auth-container
+    h2 Registration
+    #serverErrorSummary.error-summary(style="display: none")
+      p.error-title Please fix the following errors:
+      ul#serverErrorList.error-list
+    
+    if message
+      #serverErrorSummary.error-summary(style="display: block")
+        ul#serverErrorList.error-list
+          li= message
+    
+    form#registerForm.auth-form
+      .form-group
+        label(for="username") Username
+        input(
+          type="text", 
+          name="username", 
+          id="username", 
+          required,
+          minlength="3",
+          value=username || ''
+        )
+        .invalid-feedback#usernameError
+        
+      .form-group
+        label(for="email") Email
+        input(
+          type="email", 
+          name="email", 
+          id="email", 
+          required,
+          value=email || ''
+        )
+        .invalid-feedback#emailError
+      
+      .form-group
+        label(for="password") Password
+        input(
+          type="password", 
+          name="password", 
+          id="password", 
+          required,
+          minlength="5"
+        )
+        .invalid-feedback#passwordError
+      
+      .form-group
+        label(for="confirm") Confirm password
+        input(type="password", name="confirm", id="confirm", required)
+        .invalid-feedback#confirmError
+      
+      button.auth-button(type="submit") Register
+    
+    .auth-link
+      span Already have an account? 
+      a(href="/auth/login") Login
+
+  script.
+    const backendEndpoint = '/auth/register';
+    
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      resetErrors();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      try {
+        const response = await fetch(backendEndpoint, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          displayErrors(errorData);
+          return;
+        }
+        
+        const result = await response.json();
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Registration error:', error);
+        displayGenericError();
+      }
+    });
+
+    function resetErrors() {
+      document.getElementById('serverErrorSummary').style.display = 'none';
+      document.getElementById('serverErrorList').innerHTML = '';
+      
+      const errorElements = document.querySelectorAll('.invalid-feedback');
+      errorElements.forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+      });
+      
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.classList.remove('is-invalid');
+      });
+    }
+
+    function displayErrors(errorData) {
+      const serverErrorSummary = document.getElementById('serverErrorSummary');
+      const serverErrorList = document.getElementById('serverErrorList');
+      
+      if (errorData.message) {
+        serverErrorSummary.style.display = 'block';
+        serverErrorList.innerHTML = `<li>${errorData.message}</li>`;
+      }
+      
+      if (errorData.errors) {
+        serverErrorSummary.style.display = 'block';
+        
+        errorData.errors.forEach(error => {
+          const li = document.createElement('li');
+          li.textContent = error.msg;
+          serverErrorList.appendChild(li);
+          
+          const fieldError = document.getElementById(`${error.path}Error`);
+          if (fieldError) {
+            fieldError.textContent = error.msg;
+            fieldError.style.display = 'block';
+            document.getElementById(error.path).classList.add('is-invalid');
+          }
+        });
+      }
+    }
+
+    function displayGenericError() {
+      const serverErrorSummary = document.getElementById('serverErrorSummary');
+      const serverErrorList = document.getElementById('serverErrorList');
+      
+      serverErrorSummary.style.display = 'block';
+      serverErrorList.innerHTML = '<li>Registration failed. Please try again.</li>';
+    }

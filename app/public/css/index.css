@@ -1,0 +1,645 @@
+.hero-section {
+    text-align: center;
+    padding: 5rem 1rem;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 0;
+    color: #ffffff;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section .hero-subtitle {
+    color: #f8f9fa;
+    font-size: 1.3rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.button.primary {
+    background-color: #3498db;
+    color: white;
+    border: none;
+}
+
+.button.primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.button.secondary {
+    background-color: transparent;
+    color: #fff;
+    border: 2px solid #3498db;
+}
+
+.button.secondary:hover {
+    background-color: rgba(52, 152, 219, 0.2);
+}
+
+.button.outline {
+    background-color: transparent;
+    color: #fff;
+    border: 2px solid #ffffff;
+}
+
+.button.outline:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.stats-section {
+    padding: 3rem 0;
+    background-color: #3498db;
+    color: #fff;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.stat-title {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.about-section {
+    padding: 5rem 0;
+    background-color: #f8f9fa;
+}
+
+.about-section .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.about-content h2 {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.about-content h2:after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #3498db;
+    margin-top: 0.8rem;
+}
+
+.about-content p {
+    color: #5a6a7a;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.about-features {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.about-features li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.about-features i.checkmark {
+    color: #3498db;
+    margin-right: 0.8rem;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.about-image img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.services-section {
+    padding: 5rem 0;
+}
+
+.section-title {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2.2rem;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: #3498db;
+    margin: 0.8rem auto 0;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.service-card {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    border-bottom: 3px solid #3498db;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.service-icon {
+    margin-bottom: 1.2rem;
+}
+
+.service-icon i {
+    font-size: 2.5rem;
+    color: #3498db;
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+}
+
+.service-icon i.dental {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2a4 4 0 0 1 4 4c0 .73-.17 1.42-.46 2.05.39.25.77.5 1.13.78 1.4-.22 2.74.38 3.4 1.5 1.25 2.17-.6 7.15-4.07 8.17-1.95.56-3.73-1.7-5-2.24-1.27.55-3.04 2.8-5 2.24-3.47-1.02-5.32-6-4.07-8.17.66-1.12 2-1.72 3.4-1.5.36-.28.74-.53 1.13-.78A3.98 3.98 0 0 1 8 6a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2c0 .27.06.54.14.78a2 2 0 0 0 1.1 1.1c.24.08.51.14.78.14.27 0 .54-.06.78-.14a2 2 0 0 0 1.1-1.1c.08-.24.14-.51.14-.78a2 2 0 0 0-2-2m-.73 4.28c-.09.03-.19.05-.28.05-.1 0-.19-.02-.29-.05-.29.09-.64.32-.79.32h-.01c-.16 0-.51-.23-.8-.32a.798.798 0 0 0-.28-.05c-.37 0-.8.31-.96.57-.34 1.5 1.79 4.57 2.6 4.57.8 0 2.94-3.07 2.59-4.57a1.03 1.03 0 0 0-.96-.57c-.09 0-.19.02-.28.05-.28.09-.64.32-.8.32h-.01c-.15 0-.5-.23-.79-.32Z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.service-icon i.consultation {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2M6 9h12v2H6m0-4h12v2H6m0 8h8v-2H6v2Z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.service-icon i.vaccination {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M11.15 15.18 9 12.9l-6.97 6.97L2 20v-2h2.17l1.61-1.83L4 14.1V12h2v-2h2v1.93L8.9 8.07a2.006 2.006 0 0 1 0-2.83L12.9 1.23l5.66 5.66-4 4.01 2.12 2.12-6 6-1.06-1.06 2.53-2.55v-2.12L9.4 16.05l1.75-.87M19.07 21.07l-3.54-3.54 1.42-1.41 3.53 3.54-1.41 1.41z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.service-icon i.surgery {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M11 22h2v-20h-2v20M9 8h-3v2h3v-2M9 16h-3v2h3v-2M9 12h-3v2h3v-2M9 4h-3v2h3v-2M15 4h3v2h-3v-2M15 8h3v2h-3v-2M15 12h3v2h-3v-2M15 16h3v2h-3v-2Z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.service-title {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.service-description {
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+}
+
+.service-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.service-link:hover {
+    color: #2980b9;
+}
+
+.services-cta {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.vets-section {
+    padding: 5rem 0;
+    background-color: #f8f9fa;
+}
+
+.vets-slider {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+    scrollbar-width: thin;
+}
+
+.vets-slider::-webkit-scrollbar {
+    height: 8px;
+}
+
+.vets-slider::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.vets-slider::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+.vet-card {
+    flex: 0 0 300px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+}
+
+.vet-card:hover {
+    transform: translateY(-5px);
+}
+
+.vet-image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.vet-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.vet-card:hover .vet-image img {
+    transform: scale(1.05);
+}
+
+.vet-info {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.vet-name {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.vet-specialty {
+    color: #3498db;
+    margin-bottom: 1.2rem;
+    font-weight: 500;
+}
+
+.vet-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.vet-link:hover {
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.vets-cta {
+    text-align: center;
+}
+
+.appointment-section {
+    padding: 5rem 0;
+    background-color: #3498db;
+    color: white;
+}
+
+.appointment-section .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.appointment-content h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: white;
+    position: relative;
+}
+
+.appointment-content h2:after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: white;
+    margin-top: 0.8rem;
+}
+
+.appointment-content p {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.appointment-content .button.primary {
+    background-color: white;
+    color: #3498db;
+}
+
+.appointment-content .button.primary:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.calendar-placeholder {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calendar-placeholder img {
+    max-width: 100%;
+    max-height: 200px;
+}
+
+.testimonials-section {
+    padding: 5rem 0;
+}
+
+.testimonials-slider {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+    scrollbar-width: thin;
+}
+
+.testimonials-slider::-webkit-scrollbar {
+    height: 8px;
+}
+
+.testimonials-slider::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.testimonials-slider::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 4px;
+}
+
+.testimonial-card {
+    flex: 0 0 400px;
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.testimonial-card:before {
+    content: '"';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 5rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    line-height: 1;
+    font-family: serif;
+}
+
+.testimonial-content {
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.testimonial-content p {
+    color: #5a6a7a;
+    line-height: 1.7;
+    font-style: italic;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.2rem;
+}
+
+.author-pet {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.contact-section {
+    padding: 5rem 0;
+    background-color: #f8f9fa;
+}
+
+.contact-section .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.contact-content h2 {
+    color: #2c3e50;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.contact-content h2:after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #3498db;
+    margin-top: 0.8rem;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.contact-item i {
+    color: #3498db;
+    font-size: 1.2rem;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.contact-item i.location {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 11.5A2.5 2.5 0 0 1 9.5 9 2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 14.5 9a2.5 2.5 0 0 1-2.5 2.5M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Z"/></svg>');
+}
+
+.contact-item i.phone {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z"/></svg>');
+}
+
+.contact-item i.email {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>');
+}
+
+.contact-item i.clock {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>');
+}
+
+.contact-item p {
+    color: #5a6a7a;
+    line-height: 1.6;
+}
+
+.contact-map {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 991px) {
+
+    .about-section .container,
+    .appointment-section .container,
+    .contact-section .container {
+        grid-template-columns: 1fr;
+    }
+
+    .about-image {
+        order: -1;
+    }
+
+    .stats-grid {
+        justify-content: center;
+    }
+
+    .stat-card {
+        flex: 0 0 calc(50% - 1rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-title,
+    .about-content h2,
+    .appointment-content h2,
+    .contact-content h2 {
+        font-size: 2rem;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-section {
+        padding: 4rem 1rem;
+    }
+}

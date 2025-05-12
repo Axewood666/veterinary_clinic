@@ -1,0 +1,173 @@
+extends ../layouts/main.pug
+
+block content
+  .hero-section
+    .hero-content
+      h1.hero-title Ветеринарная клиника "Аксвуд"
+      p.hero-subtitle Заботимся о здоровье ваших питомцев с любовью и профессионализмом
+      .hero-actions
+        a.button.primary(href="/appointment") Записаться на приём
+        a.button.secondary(href="/services") Наши услуги
+        a.button.outline(href="/vets") Наши ветеринары
+
+  section.stats-section
+    .container
+      .stats-grid
+        .stat-card
+          .stat-number #{stats.petCount}
+          p.stat-title Счастливых питомцев
+        .stat-card
+          .stat-number #{stats.clientCount}
+          p.stat-title Довольных клиентов
+        .stat-card
+          .stat-number #{stats.appointmentCount}
+          p.stat-title Успешных приёмов
+        .stat-card
+          .stat-number 24/7
+          p.stat-title Экстренная помощь
+
+  section.about-section
+    .container
+      .about-content
+        h2 О нашей клинике
+        p Мы обеспечиваем комплексный уход за животными с использованием современного оборудования и команды опытных ветеринаров, преданных здоровью ваших питомцев.
+        
+        ul.about-features
+          li
+            i.icon.checkmark
+            span Современное диагностическое оборудование
+          li
+            i.icon.checkmark
+            span Квалифицированные ветеринары
+          li
+            i.icon.checkmark
+            span Комфортные условия для питомцев
+          li
+            i.icon.checkmark
+            span Доступные цены
+        
+        a.button.primary(href="/about") Подробнее о нас
+      .about-image
+        img(src="/images/clinic.jpg" alt="Наша ветеринарная клиника" onerror="this.src='https://cs13.pikabu.ru/post_img/2021/01/28/5/16118162674831891.jpg'")
+
+  section.services-section
+    .container
+      h2.section-title Наши услуги
+      .services-grid
+        .service-card
+          .service-icon
+            i.icon.dental
+          h3.service-title Стоматология
+          p.service-description Профессиональная чистка зубов и лечение полости рта
+          a.service-link(href="/services#dental") Подробнее
+          
+        .service-card
+          .service-icon
+            i.icon.consultation
+          h3.service-title Консультации
+          p.service-description Комплексная оценка здоровья и индивидуальные планы лечения
+          a.service-link(href="/services#consultation") Подробнее
+          
+        .service-card
+          .service-icon
+            i.icon.vaccination
+          h3.service-title Вакцинация
+          p.service-description Важные прививки для здоровья вашего питомца
+          a.service-link(href="/services#vaccination") Подробнее
+          
+        .service-card
+          .service-icon
+            i.icon.surgery
+          h3.service-title Хирургия
+          p.service-description Передовые хирургические процедуры для различных состояний
+          a.service-link(href="/services#surgery") Подробнее
+
+      .services-cta
+        a.button.primary(href="/services") Все услуги
+
+  section.vets-section
+    .container
+      h2.section-title Наши ветеринары
+      .vets-slider
+        if featuredVets && featuredVets.length > 0
+          each vet in featuredVets
+            .vet-card
+              .vet-image
+                img(src=vet.avatar alt=vet.name onerror="this.src='https://cdn-icons-png.flaticon.com/512/1752/1752766.png'")
+              .vet-info
+                h3.vet-name= vet.name
+                p.vet-specialty= vet.specialization || 'Ветеринарный врач'
+                a.vet-link(href=`/vets#${vet.userid}`) Подробнее
+        else
+          - 
+            var defaultVets = [
+              {id: 1, name: "Доктор Иванов", specialty: "Хирург", image: "/images/vets/vet1.jpg"},
+              {id: 2, name: "Доктор Петрова", specialty: "Терапевт", image: "/images/vets/vet2.jpg"},
+              {id: 3, name: "Доктор Сидоров", specialty: "Стоматолог", image: "/images/vets/vet3.jpg"}
+            ]
+          each vet in defaultVets
+            .vet-card
+              .vet-image
+                img(src=vet.image alt=vet.name onerror="this.src='https://cdn-icons-png.flaticon.com/512/1752/1752766.png'")
+              .vet-info
+                h3.vet-name= vet.name
+                p.vet-specialty= vet.specialty
+                a.vet-link(href=`/vets#${vet.id}`) Подробнее
+      
+      .vets-cta
+        a.button.secondary(href="/vets") Все наши специалисты
+
+  section.appointment-section
+    .container
+      .appointment-content
+        h2 Запись на приём
+        p Выберите удобное для вас время и запишитесь на приём к нашим специалистам онлайн
+        a.button.primary(href="/appointment") Записаться сейчас
+      .appointment-calendar
+        .calendar-placeholder
+          img(src="/images/calendar.svg" alt="Календарь записи" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8336/8336806.png'")
+
+  section.testimonials-section
+    .container
+      h2.section-title Отзывы наших клиентов
+      .testimonials-slider
+        .testimonial-card
+          .testimonial-content
+            p "Отличная клиника с заботливыми ветеринарами. Нашему коту быстро помогли вылечить инфекцию."
+          .testimonial-author
+            .author-avatar
+              img(src="/images/clients/client1.jpg" alt="Анна" onerror="this.src='https://cdn-icons-png.flaticon.com/512/219/219969.png'")
+            .author-info
+              p.author-name Анна
+              p.author-pet Владелец кота Барсика
+        
+        .testimonial-card
+          .testimonial-content
+            p "Благодарю ветеринара Петрову за профессионализм и внимательное отношение к моей собаке!"
+          .testimonial-author
+            .author-avatar
+              img(src="/images/clients/client2.jpg" alt="Иван" onerror="this.src='https://cdn-icons-png.flaticon.com/512/219/219969.png'")
+            .author-info
+              p.author-name Иван
+              p.author-pet Владелец собаки Рекса
+
+  section.contact-section
+    .container
+      .contact-content
+        h2 Свяжитесь с нами
+        .contact-info
+          .contact-item
+            i.icon.location
+            p= settings && settings.address ? settings.address : 'ул. Ветеринарная, 15, Москва'
+          .contact-item
+            i.icon.phone
+            p= settings && settings.phone ? settings.phone : '+7 (123) 456-78-90'
+          .contact-item
+            i.icon.email
+            p= settings && settings.email ? settings.email : 'info@vet-clinic.ru'
+          .contact-item
+            i.icon.clock
+            p= settings && settings.working_hours ? settings.working_hours : 'Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00'
+      
+      .contact-map
+        iframe(src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2244.529367172316!2d37.62044577675354!3d55.75364997339193!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46b54a50b315e573%3A0xa886bf5a3d9b2e68!2sThe%20Moscow%20Kremlin!5e0!3m2!1sen!2sru!4v1618923699103!5m2!1sen!2sru" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy")
