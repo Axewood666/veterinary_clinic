@@ -3,13 +3,14 @@ const logger = require('../utils/logger');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { sendInvitationEmail } = require('../services/mailerService');
 
 /**
  * Рендер страницы входа
  */
 exports.renderLogin = (req, res) => {
     // Если пользователь уже вошел, перенаправляем на главную
-    if (res.locals.isAuthenticated) {
+    if (res.user) {
         return res.redirect('/');
     }
 
@@ -26,9 +27,13 @@ exports.renderLogin = (req, res) => {
  * Обработка входа пользователя
  */
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
-
     try {
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         const user = await db('users').where('username', username).first();
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password' });
@@ -44,7 +49,7 @@ exports.login = async (req, res) => {
             return res.status(403).json({ message: `You was banned. Reason: ${activeBan.reason}` });
         }
 
-        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -53,7 +58,7 @@ exports.login = async (req, res) => {
             maxAge: 12 * 60 * 60 * 1000
         });
 
-        return res.json({ token });
+        return res.json({ token, redirect: req.query.redirect || '/' });
     } catch (error) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -65,7 +70,6 @@ exports.login = async (req, res) => {
  */
 exports.logout = async (req, res) => {
     try {
-        // Очищаем куки
         res.clearCookie('token');
 
         res.redirect('/');
@@ -74,6 +78,202 @@ exports.logout = async (req, res) => {
         res.redirect('/');
     }
 };
+
+/**
+ * Рендер страницы регистрации
+ */
+exports.renderRegister = (req, res) => {
+    // Если пользователь уже вошел, перенаправляем на главную
+    if (req.user) {
+        return res.redirect('/');
+    }
+
+    res.render('pages/auth/register', {
+        title: 'Регистрация'
+    });
+};
+
+/**
+ * Обработка регистрации пользователя
+ */
+exports.register = async (req, res) => {
+    try {
+        const { email, username, password } = req.body;
+
+        // Проверка паролей
+        if (!email || !username || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        // Проверка на существование пользователя с таким email
+        const existingUserByEmail = await db('users')
+            .where('email', email)
+            .first();
+
+        if (existingUserByEmail) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+
+        // Проверка на существование пользователя с таким username
+        const existingUserByUsername = await db('users')
+            .where('username', username)
+            .first();
+
+        if (existingUserByUsername) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        // Хеширование пароля
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Создание пользователя
+        const [created] = await db('users').insert({
+            email,
+            username,
+            password: hashedPassword,
+            role: 'Client'
+        }).returning('*');
+
+        const token = jwt.sign({ username: created.username, role: created.role, userid: created.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+
+        // Устанавливаем куки с токеном
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000 // 24 часа
+        });
+
+        // Перенаправление пользователя
+        return res.status(201).json({ redirect: '/' });
+    } catch (err) {
+        logger.error(`Ошибка при регистрации: ${err.message}`);
+        return res.status(400).json({ message: 'Произошла ошибка при регистрации' });
+    }
+};
+
+exports.sendInvite = async (req, res) => {
+    const { email, role } = req.body;
+
+    try {
+        const existingInvitation = await db('invitation_tokens').where('email', email).first();
+        if (existingInvitation) {
+            return res.status(400).json({
+                message: `An active invitation for ${email} already exists`
+            });
+        }
+
+        const existingUser = await db('users').where('email', email).first();
+        if (existingUser) {
+            return res.status(400).json({
+                message: `${email} is already busy`
+            });
+        }
+
+        const newToken = await db('invitation_tokens').insert({
+            email,
+            role,
+            token: crypto.randomBytes(32).toString('hex'),
+            expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24)
+        }).returning('*');
+
+        if (!newToken?.length) {
+            throw new Error('Failed to create an invitation token');
+        }
+
+        try {
+            await sendInvitationEmail(email, newToken[0].token);
+        } catch (mailError) {
+            await db('invitation_tokens').where('token', newToken[0].token).delete();
+            return res.status(500).json({
+                message: "Error sending the email. Try again."
+            });
+        }
+
+        return res.status(201).json({
+            message: `The invitation has been sent to ${email}`
+        });
+    } catch (error) {
+        console.error('Invite create error:', error);
+
+        if (error.message.includes('duplicate key value')) {
+            return res.status(400).json({
+                message: "An invitation with such a token already exists. Retry."
+            });
+        }
+
+        res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
+
+exports.registerByInvite = async (req, res) => {
+    const { username, password, token } = req.body;
+    try {
+        const invite = await db('invitation_tokens').where('token', token).first();
+        if (!invite) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+
+        const existingUsername = await db('users').where('username', username).first();
+        if (existingUsername) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        const newUser = await db('users').insert({
+            username,
+            password,
+            email: invite.email,
+            role: invite.role
+        }).returning('*');
+
+        if (!newUser?.length) {
+            throw new Error('Failed to register. Please try again later.');
+        }
+
+        await db('invitation_tokens').where('token', token).update({ used: true });
+
+        const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+
+        res.status(201).json({
+            username: newUser.username,
+            email: newUser.email,
+            token: JWTtoken
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Iternal server error: " + error.message
+        });
+    }
+}
+
+exports.banUser = async (req, res) => {
+    const { userid, reason } = req.body;
+    if (!userid) {
+        return res.status(400).json({ message: 'Userid is required' })
+    }
+    if (!reason) {
+        reason = "Po prikolu"
+    }
+    try {
+        const user = await db('users').where('userid', userid).first();
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        };
+
+        await db('user_bans').insert({
+            userid,
+            reason,
+            banned_by: req.user.userid
+        });
+
+        return res.status(200).json({ message: 'User was banned' });
+    } catch (error) {
+        res.status(500).json({
+            message: "Iternal server error: " + error.message
+        });
+    }
+}
 
 /**
  * Рендер страницы восстановления пароля
@@ -129,7 +329,7 @@ exports.forgotPassword = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при запросе восстановления пароля: ${err.message}`);
-        res.addError('Произошла ошибка при обработке запроса');
+
         res.render('auth/forgot-password', {
             title: 'Восстановление пароля',
             email: req.body.email
@@ -151,7 +351,7 @@ exports.renderResetPassword = async (req, res) => {
             .first();
 
         if (!user) {
-            res.addError('Недействительный или устаревший токен восстановления пароля');
+
             return res.redirect('/auth/forgot-password');
         }
 
@@ -161,7 +361,7 @@ exports.renderResetPassword = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при отображении страницы сброса пароля: ${err.message}`);
-        res.addError('Произошла ошибка при обработке запроса');
+
         res.redirect('/auth/forgot-password');
     }
 };
@@ -176,7 +376,7 @@ exports.resetPassword = async (req, res) => {
 
         // Проверяем совпадение паролей
         if (password !== password_confirmation) {
-            res.addError('Пароли не совпадают');
+
             return res.render('auth/reset-password', {
                 title: 'Установка нового пароля',
                 token
@@ -190,7 +390,7 @@ exports.resetPassword = async (req, res) => {
             .first();
 
         if (!user) {
-            res.addError('Недействительный или устаревший токен восстановления пароля');
+
             return res.redirect('/auth/forgot-password');
         }
 
@@ -210,7 +410,7 @@ exports.resetPassword = async (req, res) => {
         res.redirect('/auth/login');
     } catch (err) {
         logger.error(`Ошибка при сбросе пароля: ${err.message}`);
-        res.addError('Произошла ошибка при смене пароля');
+
         res.render('auth/reset-password', {
             title: 'Установка нового пароля',
             token: req.params.token
@@ -243,7 +443,7 @@ exports.updateProfile = async (req, res) => {
                 .first();
 
             if (existingUser) {
-                res.addError('Данный email уже используется');
+
                 return res.render('auth/profile', {
                     title: 'Мой профиль',
                     formData: req.body
@@ -282,7 +482,7 @@ exports.updateProfile = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при обновлении профиля: ${err.message}`);
-        res.addError('Произошла ошибка при обновлении профиля');
+
         res.render('auth/profile', {
             title: 'Мой профиль',
             formData: req.body
@@ -307,7 +507,7 @@ exports.changePassword = async (req, res) => {
         // Проверяем текущий пароль
         const isPasswordValid = await bcrypt.compare(current_password, user.password);
         if (!isPasswordValid) {
-            res.addError('Текущий пароль указан неверно');
+
             return res.render('auth/profile', {
                 title: 'Мой профиль',
                 passwordError: true
@@ -316,7 +516,7 @@ exports.changePassword = async (req, res) => {
 
         // Проверяем совпадение новых паролей
         if (new_password !== password_confirmation) {
-            res.addError('Новые пароли не совпадают');
+
             return res.render('auth/profile', {
                 title: 'Мой профиль',
                 passwordError: true
@@ -340,7 +540,7 @@ exports.changePassword = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при смене пароля: ${err.message}`);
-        res.addError('Произошла ошибка при смене пароля');
+
         res.render('auth/profile', {
             title: 'Мой профиль',
             passwordError: true
@@ -348,83 +548,3 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-/**
- * Рендер страницы регистрации
- */
-exports.renderRegister = (req, res) => {
-    // Если пользователь уже вошел, перенаправляем на главную
-    if (req.user) {
-        return res.redirect('/');
-    }
-
-    res.render('pages/auth/register', {
-        title: 'Регистрация'
-    });
-};
-
-/**
- * Обработка регистрации пользователя
- */
-exports.register = async (req, res) => {
-    try {
-        const { email, username, password } = req.body;
-
-        // Проверка паролей
-        if (!email || !username || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
-        }
-
-        // Проверка на существование пользователя с таким email
-        const existingUserByEmail = await db('users')
-            .where('email', email)
-            .first();
-
-        if (existingUserByEmail) {
-            return res.status(400).json({ message: 'Email already exists' });
-        }
-
-        // Проверка на существование пользователя с таким username
-        const existingUserByUsername = await db('users')
-            .where('username', username)
-            .first();
-
-        if (existingUserByUsername) {
-            return res.status(400).json({ message: 'Username already exists' });
-        }
-
-        // Хеширование пароля
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Создание пользователя
-        const user = await db('users').insert({
-            email,
-            username,
-            password: hashedPassword,
-            role: 'Client'
-        }, 'userid');
-
-        const token = jwt.sign(
-            { userid: user.userid, role: 'Client', username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        // Устанавливаем куки с токеном
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000 // 24 часа
-        });
-
-        // Перенаправление пользователя
-        res.redirect('/');
-
-    } catch (err) {
-        logger.error(`Ошибка при регистрации: ${err.message}`);
-        res.render('pages/auth/register', {
-            title: 'Регистрация',
-            error: 'Произошла ошибка при регистрации',
-            formData: req.body
-        });
-    }
-}; 

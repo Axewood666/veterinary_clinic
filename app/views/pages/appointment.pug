@@ -9,25 +9,16 @@ block content
         p= error
     
     .appointment-form
-      form(action="/api/appointments" method="POST")
+      form(action="/appointment" method="POST")
         .row
           h3 Информация о владельце
           .col-md-6
             .form-group
-              label(for="owner_first_name") Имя владельца *
-              input.form-control#owner_first_name(
+              label(for="owner_name") Имя владельца *
+              input.form-control#owner_name(
                 type="text" 
-                name="owner_first_name"
-                value=formData.owner_first_name || ''
-                required
-              )
-          .col-md-6
-            .form-group
-              label(for="owner_last_name") Фамилия владельца *
-              input.form-control#owner_last_name(
-                type="text" 
-                name="owner_last_name"
-                value=formData.owner_last_name || ''
+                name="owner_name"
+                value=formData.owner_name || ''
                 required
               )
           .col-md-6
@@ -41,11 +32,12 @@ block content
               )
           .col-md-6
             .form-group
-              label(for="owner_email") Email владельца
+              label(for="owner_email") Email владельца *
               input.form-control#owner_email(
                 type="email" 
                 name="owner_email"
                 value=formData.owner_email || ''
+                required
               )
         
         .row
@@ -61,58 +53,77 @@ block content
               )
           .col-md-6
             .form-group
-              label(for="pet_species") Вид животного *
-              select.form-control#pet_species(
-                name="pet_species"
+              label(for="pet_type") Вид животного *
+              select.form-control#pet_type(
+                name="pet_type"
                 required
               )
                 option(value="" disabled selected) Выберите вид животного
-                option(value="Кошка" selected=formData.pet_species === 'Кошка') Кошка
-                option(value="Собака" selected=formData.pet_species === 'Собака') Собака
-                option(value="Грызун" selected=formData.pet_species === 'Грызун') Грызун
-                option(value="Птица" selected=formData.pet_species === 'Птица') Птица
-                option(value="Другое" selected=formData.pet_species === 'Другое') Другое
+                option(value="cat" selected=formData.pet_type === 'cat') Кошка
+                option(value="dog" selected=formData.pet_type === 'dog') Собака
+                option(value="bird" selected=formData.pet_type === 'bird') Птица
+                option(value="fish" selected=formData.pet_type === 'fish') Рыба
+                option(value="other" selected=formData.pet_type === 'other') Другое
           .col-md-6
             .form-group
-              label(for="pet_age") Возраст питомца (лет)
+              label(for="pet_age") Возраст питомца (лет) *
               input.form-control#pet_age(
                 type="number" 
                 name="pet_age"
                 value=formData.pet_age || ''
                 min="0"
-                step="0.1"
+                required
               )
+          .col-md-6
+            .form-group
+              label(for="pet_breed") Порода *
+              input.form-control#pet_breed(
+                type="text" 
+                name="pet_breed"
+                value=formData.pet_breed || ''
+                required
+              )
+          .col-md-6
+            .form-group
+              label(for="pet_gender") Пол животного *
+              select.form-control#pet_gender(
+                name="pet_gender"
+                required
+              )
+                option(value="" disabled selected) Выберите пол
+                option(value="male" selected=formData.pet_gender === 'male') Самец
+                option(value="female" selected=formData.pet_gender === 'female') Самка
         
         .row
           h3 Информация о приеме
           .col-md-6
             .form-group
-              label(for="vet_id") Выберите ветеринара *
-              select.form-control#vet_id(
-                name="vet_id"
+              label(for="vetid") Выберите ветеринара *
+              select.form-control#vetid(
+                name="vetid"
                 required
               )
                 option(value="" disabled selected) Выберите ветеринара
                 each vet in vets
                   option(
-                    value=vet.id 
-                    selected=formData.vet_id == vet.id
-                  )= `${vet.last_name} ${vet.first_name} (${vet.specialization})`
+                    value=vet.userid 
+                    selected=formData.vetid == vet.userid
+                  )= vet.name || `Ветеринар #${vet.userid}`
           .col-md-6
             .form-group
-              label(for="appointment_date") Дата приема *
-              input.form-control#appointment_date(
+              label(for="date") Дата приема *
+              input.form-control#date(
                 type="date" 
-                name="appointment_date"
-                value=formData.appointment_date || ''
+                name="date"
+                value=formData.date || ''
                 required
                 min=new Date().toISOString().split('T')[0]
               )
           .col-md-6
             .form-group
-              label(for="appointment_time") Время приема *
-              select.form-control#appointment_time(
-                name="appointment_time"
+              label(for="time") Время приема *
+              select.form-control#time(
+                name="time"
                 required
               )
                 option(value="" disabled selected) Выберите время
@@ -129,16 +140,27 @@ block content
                     - const timeString = `${formattedHour}:${formattedMinute}`
                     option(
                       value=timeString 
-                      selected=formData.appointment_time === timeString
+                      selected=formData.time === timeString
                     )= timeString
           .col-md-12
             .form-group
-              label(for="reason") Причина обращения *
-              textarea.form-control#reason(
-                name="reason"
+              label(for="comment") Причина обращения *
+              textarea.form-control#comment(
+                name="comment"
                 rows="3"
                 required
-              )= formData.reason || ''
+              )= formData.comment || ''
+          .col-md-6
+            .form-group
+              label(for="type") Тип приема *
+              select.form-control#type(
+                name="type"
+                required
+              )
+                option(value="" disabled selected) Выберите тип приема
+                option(value="consultation" selected=formData.type === 'consultation') Консультация
+                option(value="vaccination" selected=formData.type === 'vaccination') Вакцинация
+                option(value="other" selected=formData.type === 'other') Другое
         
         .form-group.text-center.mt-4
           button.btn.btn-primary.btn-lg(type="submit") Записаться на прием

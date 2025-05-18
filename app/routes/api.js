@@ -17,6 +17,7 @@ router.get('/vets/:id/appointments', vetsController.getAppointments);
 
 // Маршруты для питомцев
 router.get('/pets', petsController.getAll);
+router.get('/pets/filter', petsController.getAll);
 router.get('/pets/:id', petsController.getOne);
 router.post('/pets', petsController.create);
 router.put('/pets/:id', petsController.update);

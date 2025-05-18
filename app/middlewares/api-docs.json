@@ -1,0 +1,101 @@
+[
+  {
+    "method": "GET",
+    "path": "/employee/clients",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/images/default-avatar.png",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/admin/vets",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/employee/pets",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/admin/dashboard",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/dashboard/stats",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/dashboard/appointments-chart",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/dashboard/pets-type-chart",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/auth/logout",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/images/vets/vet2.jpg",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/auth/login",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "query": {},
+    "body": {
+      "username": "admin",
+      "password": "admin123"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/images/vets/vet3.jpg",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/dashboard/appointments-status-chart",
+    "query": {},
+    "body": {}
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/dashboard/vets-workload-chart",
+    "query": {},
+    "body": {}
+  }
+]

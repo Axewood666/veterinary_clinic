@@ -16,8 +16,6 @@ block content
                 th Имя
                 th Email
                 th Телефон
-                th Специализация
-                th Статус
                 th Действия
             tbody
               each vet in vets
@@ -26,12 +24,9 @@ block content
                   td= vet.name
                   td= vet.email
                   td= vet.phoneNumber
-                  td= vet.specialization
-                  td= vet.isActive ? 'Активен' : 'Неактивен'
                   td
                     button.view-btn(data-vetid=vet.userid) Просмотр
                     button.edit-btn(data-vetid=vet.userid) Редактировать
-                    button.toggle-status-btn(data-vetid=vet.userid)= vet.isActive ? 'Деактивировать' : 'Активировать'
 
         .vet-details#vetDetails
           .details-header
@@ -115,8 +110,6 @@ block scripts
         document.getElementById('detailName').textContent = vetData.name;
         document.getElementById('detailEmail').textContent = vetData.email;
         document.getElementById('detailPhone').textContent = vetData.phoneNumber || 'Н/Д';
-        document.getElementById('detailSpecialization').textContent = vetData.specialization || 'Н/Д';
-        document.getElementById('detailStatus').textContent = vetData.isActive ? 'Активен' : 'Неактивен';
         
         document.getElementById('vetDetails').classList.add('active');
       }
@@ -146,11 +139,11 @@ block scripts
         if (appointments.length > 0) {
           appointmentsList.innerHTML = appointments.map(appointment => `
             <div class="appointment-item">
-              <h4>Прием #${appointment.appointmentId}</h4>
+              <h4>Прием #${appointment.appointmentid}</h4>
               <p>Дата: ${new Date(appointment.date).toLocaleDateString()}</p>
               <p>Время: ${appointment.time}</p>
-              <p>Клиент: ${appointment.clientName}</p>
-              <p>Питомец: ${appointment.petName}</p>
+              <p>Клиент: ${appointment.client_name}</p>
+              <p>Питомец: ${appointment.pet_name}</p>
               <p>Статус: ${appointment.status}</p>
             </div>
           `).join('');

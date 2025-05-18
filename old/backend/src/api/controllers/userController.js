@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const { Users, invitation_token, UserBan } = require('../models');
-const { sendInvitationEmail } = require("../services/mailerService");
+const { sendInvitationEmail } = require("../../../../../app/services/mailerService");
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
         if (!newUser?.length) {
             throw new Error('Failed');
         }
-        const token = jwt.sign({ username, role: newUser.role, userid: newUser.userid }, JWT_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({ username, role: newUser.role, userid: newUser.userid }, JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -78,7 +78,7 @@ exports.login = async (req, res) => {
             res.status(403).json({ message: `You was banned. Reason: ${activeBan.reason}` });
         }
 
-        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, JWT_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -175,7 +175,7 @@ exports.registerByInvite = async (req, res) => {
 
         await invitation_token.updateUsedByToken(token);
 
-        const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, JWT_SECRET, { expiresIn: '12h' });
+        const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
 
         res.status(201).json({
             username: newUser.username,

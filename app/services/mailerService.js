@@ -1,9 +1,9 @@
 const { sendMail } = require('./mailer');
-const { email_template } = require('../models');
+const db = require('../config/database');
 
 
 async function getTemplateAndFill(name, variables) {
-    const template = await email_template.getByName(name);
+    const template = await db('email_templates').where('name', name).first();
     if (!template) throw new Error('Шаблон не найден');
 
     let html = template.body;

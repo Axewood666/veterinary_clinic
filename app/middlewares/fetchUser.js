@@ -17,6 +17,11 @@ module.exports = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+        if (!decoded.userid) {
+            req.user = null;
+            return next();
+        }
+
         const user = await db('users')
             .where('userid', decoded.userid)
             .first();
@@ -32,8 +37,6 @@ module.exports = async (req, res, next) => {
             email: user.email,
             role: user.role
         };
-
-        next();
     } catch (error) {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             req.user = null;

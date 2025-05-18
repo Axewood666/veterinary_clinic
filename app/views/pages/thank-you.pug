@@ -1,0 +1,105 @@
+extends ../layouts/default.pug
+
+block content
+  .container.thank-you-page
+    .card
+      .card-body.text-center
+        i.icon.success
+        h1.thank-you-title Спасибо за запись!
+        p.thank-you-message Ваша заявка на прием успешно создана.
+        p.thank-you-details Мы свяжемся с вами в ближайшее время для подтверждения записи.
+        
+        .support-info.mt-4
+          p По любым вопросам обращайтесь:
+          p.phone
+            i.icon.phone
+            span +7 (123) 456-78-90
+          p.email
+            i.icon.email
+            span info@vet-clinic.ru
+        
+        .actions.mt-4
+          a.button.primary(href="/") Вернуться на главную
+          a.button.secondary(href="/services") Наши услуги
+
+block styles
+  style.
+    .thank-you-page {
+      padding: 40px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60vh;
+    }
+    
+    .thank-you-page .card {
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    
+    .thank-you-title {
+      color: #28a745;
+      margin-top: 20px;
+      font-size: 2.5rem;
+    }
+    
+    .thank-you-message {
+      font-size: 1.2rem;
+      margin-top: 15px;
+    }
+    
+    .thank-you-details {
+      color: #6c757d;
+      margin-top: 10px;
+    }
+    
+    .icon.success {
+      display: block;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      background-color: #28a745;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .icon.success:before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40%;
+      height: 20%;
+      border-bottom: 5px solid white;
+      border-right: 5px solid white;
+      transform-origin: center;
+      transform: translate(-50%, -65%) rotate(45deg);
+    }
+    
+    .support-info {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .phone, .email {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    
+    .phone .icon, .email .icon {
+      margin-right: 10px;
+      color: #007bff;
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    } 

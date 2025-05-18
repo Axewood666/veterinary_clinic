@@ -1,0 +1,48 @@
+header.site-header
+  .container
+    nav.navbar.navbar-expand-lg.navbar-light
+      a.navbar-brand(href="/") Ветеринарная клиника
+      
+      button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbarMain")
+        span.navbar-toggler-icon
+      
+      .collapse.navbar-collapse#navbarMain
+        ul.navbar-nav.mr-auto
+          li.nav-item
+            a.nav-link(href="/") Главная
+          li.nav-item
+            a.nav-link(href="/services") Услуги
+          li.nav-item
+            a.nav-link(href="/vets") Ветеринары
+          li.nav-item
+            a.nav-link(href="/about") О нас
+          li.nav-item
+            a.nav-link(href="/contacts") Контакты
+          li.nav-item
+            a.nav-link.appointment-link(href="/appointment") Записаться на прием
+        
+        ul.navbar-nav.ml-auto
+          if user
+            if user.role === 'Admin' || user.role === 'Manager'
+              li.nav-item
+                a.nav-link(href="/admin/dashboard") Админ-панель
+            if user.role === 'Vet'
+              li.nav-item
+                a.nav-link(href="/vet/appointments") Мои приемы
+            if user.role === 'Client'
+              li.nav-item
+                a.nav-link(href="/client/pets") Мои питомцы
+              li.nav-item
+                a.nav-link(href="/client/appointments") Мои приемы
+            li.nav-item.dropdown
+              a.nav-link.dropdown-toggle(href="#" id="userDropdown" role="button" data-toggle="dropdown")
+                | #{user.name || user.username}
+              .dropdown-menu.dropdown-menu-right
+                a.dropdown-item(href="/auth/profile") Профиль
+                .dropdown-divider
+                a.dropdown-item(href="#" id="logout-link") Выйти
+          else
+            li.nav-item
+              a.nav-link(href="/auth/login") Войти
+            li.nav-item
+              a.nav-link(href="/auth/register") Регистрация 

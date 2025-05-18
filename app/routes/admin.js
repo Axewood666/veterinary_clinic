@@ -10,18 +10,17 @@ router.use(authMiddleware.requireAdmin);
 // Дашборд
 router.get('/dashboard', adminController.renderDashboard);
 
+// Управление сотрудниками
+router.get('/invite', adminController.renderInvite);
+
 // Управление ветеринарами
 router.get('/vets', adminController.renderVets);
 router.get('/vets/new', adminController.renderNewVetForm);
 router.get('/vets/:id/edit', adminController.renderEditVetForm);
 
-// Управление питомцами
-router.get('/pets', adminController.renderPets);
-router.get('/pets/:id', adminController.renderPetDetails);
-
-// Управление приемами
-router.get('/appointments', adminController.renderAppointments);
-router.get('/appointments/:id', adminController.renderAppointmentDetails);
+// Управление менеджерами
+// router.get('/managers', adminController.renderManagers);
+// router.get('/managers/:id', adminController.getManagerDetails);
 
 // Настройки клиники
 router.get('/settings', adminController.renderSettings);

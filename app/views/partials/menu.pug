@@ -5,19 +5,18 @@ nav
     ul.nav-list
       if user
         if user.role === 'Admin'
-          li: a(href="/admin/clients" class="nav-link") Admin panel
-        if user.role === 'Vet'
-          li: a(href="/appointments" class="nav-link") Appointments
-          li: a(href="/schedules" class="nav-link") Schedules
-        if user.role === 'Manager'
-          li: a(href="/admin/clients" class="nav-link") Admin panel
+          li: a(href="/admin/dashboard" class="nav-link") Admin panel
+        if user.role === 'Vet' || user.role === 'Manager'
+          li: a(href="/employee/appointments" class="nav-link") Appointments
+          li: a(href="/employee/clients" class="nav-link") Clients
+          li: a(href="/employee/pets" class="nav-link") Pets
         if user.role === 'Client'
           li: a(href="/pets" class="nav-link") Pets
           li: a(href="/appointments" class="nav-link") Appointments
           li: a(href="/profile" class="nav-link") Profile
     .buttons  
       if user
-        a.logout-btn(href="/auth/logout") Выход
+        button.logout(id="logout-button") Выход
       else
         button.signin(id="signin-button") Login
         button.registration(id="signup-button") Registration

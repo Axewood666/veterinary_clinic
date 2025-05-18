@@ -25,7 +25,7 @@ exports.getAll = async (req, res) => {
 exports.getOne = async (req, res) => {
     try {
         const vet = await db('users')
-            .select('*')
+            .select('userid', 'name', 'email', 'phoneNumber', 'role', 'avatar')
             .where('userid', req.params.id)
             .where('role', 'Vet')
             .first();

@@ -185,25 +185,10 @@ exports.renderVetsPage = async (req, res) => {
  */
 exports.renderAppointmentPage = async (req, res) => {
     try {
-        // Получаем активных (не забаненных) ветеринаров
-        const activatedVetsIds = await db.select('users.userid')
-            .from('users')
-            .leftJoin('user_bans', function () {
-                this.on('users.userid', '=', 'user_bans.userid')
-                    .andOn(function () {
-                        this.whereNull('user_bans.expires_at')
-                            .orWhere('user_bans.expires_at', '>', db.fn.now());
-                    });
-            })
-            .where('users.role', 'Vet')
-            .whereNull('user_bans.id')
-            .pluck('users.userid');
-
-        // Получение списка активных ветеринаров
+        // Получаем активных ветеринаров
         const vets = await db('users')
-            .select('userid', 'name', 'specialization')
+            .select('userid', 'name', 'email')
             .where('role', 'Vet')
-            .whereIn('userid', activatedVetsIds)
             .orderBy('name', 'asc');
 
         // Получаем настройки для рабочих часов

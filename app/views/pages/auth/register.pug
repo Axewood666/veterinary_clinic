@@ -87,7 +87,7 @@ block content
         }
         
         const result = await response.json();
-        window.location.href = '/';
+        window.location.href = result.redirect || '/';
       } catch (error) {
         console.error('Registration error:', error);
         displayGenericError();

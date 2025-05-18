@@ -10,6 +10,7 @@
         "seed": "knex seed:run",
         "migrate:make": "knex migrate:make",
         "seed:make": "knex seed:make",
+        "test:mocha": "mocha --recursive --exit",
         "test": "jest"
     },
     "dependencies": {
@@ -23,6 +24,7 @@
         "knex": "^3.0.1",
         "morgan": "^1.10.0",
         "multer": "^1.4.5-lts.1",
+        "nodemailer": "^7.0.3",
         "pg": "^8.11.3",
         "pug": "^3.0.2",
         "winston": "^3.11.0",
@@ -31,8 +33,9 @@
     "devDependencies": {
         "eslint": "^8.55.0",
         "jest": "^29.7.0",
+        "mocha": "^11.3.0",
         "nodemon": "^3.0.2",
-        "supertest": "^6.3.3"
+        "supertest": "^6.3.4"
     },
     "engines": {
         "node": ">=18.0.0"

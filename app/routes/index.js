@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const homeController = require('../controllers/homeController.js');
 const appointmentsController = require('../controllers/appointmentsController');
-const { requireAuth } = require('../middlewares/authMiddleware');
 
 // Главная страница
 router.get('/', homeController.renderHomePage);

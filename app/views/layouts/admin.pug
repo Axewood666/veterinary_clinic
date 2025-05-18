@@ -16,27 +16,33 @@ html(lang="en")
 
         nav.sidebar-nav
           ul
-            li
+            if user.role === 'Admin'
+              li
               a(href="/admin/dashboard", class=activePage === 'dashboard' ? 'active' : '')
                 i.fas.fa-chart-line
                 span Dashboard
-            li
+            if user.role === 'Admin'
+              li
               a(href="/admin/vets", class=activePage === 'vets' ? 'active' : '')
                 i.fas.fa-user-md
                 span Veterinarians
-            li
-              a(href="/admin/clients", class=activePage === 'clients' ? 'active' : '')
+            if user.role === 'Admin' || user.role === 'Manager' || user.role === 'Vet'
+              li
+              a(href="/employee/clients", class=activePage === 'clients' ? 'active' : '')
                 i.fas.fa-users
                 span Clients
-            li
-              a(href="/admin/pets", class=activePage === 'pets' ? 'active' : '')
+            if user.role === 'Admin' || user.role === 'Manager' || user.role === 'Vet'
+              li
+              a(href="/employee/pets", class=activePage === 'pets' ? 'active' : '')
                 i.fas.fa-paw
                 span Pets
-            li
-              a(href="/admin/appointments", class=activePage === 'appointments' ? 'active' : '')
+            if user.role === 'Admin' || user.role === 'Manager' || user.role === 'Vet'
+              li
+              a(href="/employee/appointments", class=activePage === 'appointments' ? 'active' : '')
                 i.fas.fa-calendar-alt
                 span Appointments
-            li
+            if user.role === 'Admin'
+              li
               a(href="/admin/settings", class=activePage === 'settings' ? 'active' : '')
                 i.fas.fa-cog
                 span Settings
@@ -61,19 +67,8 @@ html(lang="en")
             .notifications
               button.notifications-toggle
                 i.fas.fa-bell
-                if notificationsCount > 0
-                  span.notification-badge= notificationsCount
               .notifications-dropdown
-                if notifications.length > 0
-                  each notification in notifications
-                    .notification-item(class=notification.read ? 'read' : '')
-                      .notification-icon
-                        i(class=notification.icon)
-                      .notification-content
-                        .notification-title= notification.title
-                        .notification-text= notification.text
-                        .notification-time= notification.time
-                else
+                if true
                   .notification-empty
                     p No new notifications
 

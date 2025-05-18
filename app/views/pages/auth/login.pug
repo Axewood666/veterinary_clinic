@@ -7,11 +7,6 @@ block content
       p.error-title Please fix the following errors:
       ul#serverErrorList.error-list
     
-    if message
-      #serverErrorSummary.error-summary(style="display: block")
-        ul#serverErrorList.error-list
-          li= message
-    
     form#loginForm.auth-form
       .form-group
         label(for="username") Username
@@ -22,10 +17,6 @@ block content
         label(for="password") Password
         input(type="password", name="password", id="password", required)
         .invalid-feedback#passwordError
-
-      .form-group.checkbox
-        input(type="checkbox", id="remember", name="remember")
-        label(for="remember") Remember me
       
       button.auth-button(type="submit") Login
     
@@ -60,7 +51,7 @@ block content
           return;
         }
         
-        window.location.href = '/';
+        window.location.href = response.redirect || '/';
       } catch (error) {
         console.error('Login error:', error);
         displayGenericError();

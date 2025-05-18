@@ -8,28 +8,16 @@ block content
     .stats-grid
       .stat-card
         .stat-title Всего клиентов
-        .stat-value#totalClients -
-        .stat-change
-          span.change-label За последние 30 дней:
-          span.change-value#clientsChange -
+        .stat-value#totalClients - #{stats.clients.total}
       .stat-card
         .stat-title Всего питомцев
-        .stat-value#totalPets -
-        .stat-change
-          span.change-label За последние 30 дней:
-          span.change-value#petsChange -
+        .stat-value#totalPets - #{stats.pets.total}
       .stat-card
-        .stat-title Всего приемов
-        .stat-value#totalAppointments -
-        .stat-change
-          span.change-label За последние 30 дней:
-          span.change-value#appointmentsChange -
+        .stat-title Проведенных приемов
+        .stat-value#totalAppointments - #{stats.appointments.total}
       .stat-card
-        .stat-title Активных ветеринаров
-        .stat-value#activeVets -
-        .stat-change
-          span.change-label За последние 30 дней:
-          span.change-value#vetsChange -
+        .stat-title Всего ветеринаров
+        .stat-value#activeVets - #{stats.vets.total}
 
     .charts-grid
       .chart-card

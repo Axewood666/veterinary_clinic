@@ -6,15 +6,15 @@ const logger = require('../utils/logger');
  */
 exports.getAll = async (req, res) => {
     try {
-        const { name, species, owner_id, limit, offset } = req.query;
+        const { name, type, owner_id, limit, offset } = req.query;
 
         // Базовый запрос
         let query = db('pets')
-            .leftJoin('clients', 'pets.owner_id', 'clients.id')
+            .leftJoin('users', 'pets.userid', 'users.userid')
             .select(
                 'pets.*',
-                'clients.first_name as owner_first_name',
-                'clients.last_name as owner_last_name'
+                'users.name as ownerName',
+                'users.username as ownerUsername'
             );
 
         // Применение фильтров
@@ -22,12 +22,12 @@ exports.getAll = async (req, res) => {
             query = query.whereRaw('LOWER(pets.name) LIKE ?', [`%${name.toLowerCase()}%`]);
         }
 
-        if (species) {
-            query = query.where('pets.species', species);
+        if (type) {
+            query = query.where('pets.type', type);
         }
 
         if (owner_id) {
-            query = query.where('pets.owner_id', owner_id);
+            query = query.where('pets.userid', owner_id);
         }
 
         // Сортировка
@@ -58,15 +58,13 @@ exports.getAll = async (req, res) => {
 exports.getOne = async (req, res) => {
     try {
         const pet = await db('pets')
-            .leftJoin('clients', 'pets.owner_id', 'clients.id')
+            .leftJoin('users', 'pets.userid', 'users.userid')
             .select(
                 'pets.*',
-                'clients.first_name as owner_first_name',
-                'clients.last_name as owner_last_name',
-                'clients.phone as owner_phone',
-                'clients.email as owner_email'
+                'users.name as ownerName',
+                'users.username as ownerUsername'
             )
-            .where('pets.id', req.params.id)
+            .where('pets.petid', req.params.id)
             .first();
 
         if (!pet) {
@@ -99,8 +97,8 @@ exports.create = async (req, res) => {
 
         // Проверка существования владельца
         if (owner_id) {
-            const owner = await db('clients')
-                .where('id', owner_id)
+            const owner = await db('users')
+                .where('userid', owner_id)
                 .first();
 
             if (!owner) {
@@ -121,10 +119,10 @@ exports.create = async (req, res) => {
             owner_id,
             created_at: new Date(),
             updated_at: new Date()
-        }, 'id');
+        }, 'petid');
 
         const newPet = await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .first();
 
         res.status(201).json(newPet);
@@ -154,7 +152,7 @@ exports.update = async (req, res) => {
 
         // Проверка существования питомца
         const pet = await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .first();
 
         if (!pet) {
@@ -163,8 +161,8 @@ exports.update = async (req, res) => {
 
         // Проверка существования нового владельца, если указан
         if (owner_id && owner_id !== pet.owner_id) {
-            const owner = await db('clients')
-                .where('id', owner_id)
+            const owner = await db('users')
+                .where('userid', owner_id)
                 .first();
 
             if (!owner) {
@@ -188,11 +186,11 @@ exports.update = async (req, res) => {
         if (owner_id !== undefined) updateData.owner_id = owner_id;
 
         await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .update(updateData);
 
         const updatedPet = await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .first();
 
         res.json(updatedPet);
@@ -211,32 +209,31 @@ exports.delete = async (req, res) => {
 
         // Проверка существования питомца
         const pet = await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .first();
 
         if (!pet) {
-            return res.status(404).json({ error: 'Питомец не найден' });
+            return res.status(404).json({ message: 'Питомец не найден' });
         }
 
-        // Проверка наличия активных приемов
-        const activeAppointments = await db('appointments')
-            .where('pet_id', id)
-            .where('status', 'scheduled')
+        // Проверка наличия ЛЮБЫХ приемов, связанных с питомцем
+        const existingAppointments = await db('appointments')
+            .where('petid', id)
             .first();
 
-        if (activeAppointments) {
-            return res.status(400).json({ error: 'Невозможно удалить питомца с активными приемами' });
+        if (existingAppointments) {
+            return res.status(400).json({ message: 'Невозможно удалить питомца, так как у него имеются записи о приемах. Пожалуйста, сначала удалите или архивируйте связанные приемы.' });
         }
 
         // Удаление питомца
         await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .del();
 
         res.json({ message: 'Питомец успешно удален' });
     } catch (err) {
         logger.error(`Ошибка при удалении питомца: ${err.message}`);
-        res.status(500).json({ error: 'Ошибка при удалении питомца' });
+        res.status(500).json({ message: 'Ошибка при удалении питомца' });
     }
 };
 
@@ -249,7 +246,7 @@ exports.getHistory = async (req, res) => {
 
         // Проверка существования питомца
         const pet = await db('pets')
-            .where('id', id)
+            .where('petid', id)
             .first();
 
         if (!pet) {
@@ -258,24 +255,14 @@ exports.getHistory = async (req, res) => {
 
         // Получение истории приемов
         const appointments = await db('appointments')
-            .join('vets', 'appointments.vet_id', 'vets.id')
+            .join('users', 'appointments.vetid', 'users.userid')
             .select(
                 'appointments.*',
-                'vets.first_name as vet_first_name',
-                'vets.last_name as vet_last_name',
-                'vets.specialization as vet_specialization'
+                'users.name as vetName',
+                'users.username as vetUsername',
             )
-            .where('pet_id', id)
-            .orderBy('appointment_date', 'desc');
-
-        // Добавление медицинских записей к каждому приему
-        for (let appointment of appointments) {
-            const records = await db('medical_records')
-                .where('appointment_id', appointment.id)
-                .orderBy('created_at', 'asc');
-
-            appointment.medical_records = records;
-        }
+            .where('petid', id)
+            .orderBy('date', 'desc');
 
         res.json(appointments);
     } catch (err) {

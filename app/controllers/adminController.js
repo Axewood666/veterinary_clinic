@@ -7,20 +7,30 @@ const logger = require('../utils/logger');
 exports.renderDashboard = async (req, res) => {
     try {
         const stats = await this.getDashboardStats(req, res);
-        res.render('admin/dashboard', {
+
+        res.render('pages/admin/dashboard', {
             title: 'Панель управления',
             activePage: 'dashboard',
+            user: req.user,
             stats: stats
         });
     } catch (err) {
         logger.error(`Ошибка при загрузке дашборда: ${err.message}`);
-        res.addError('Не удалось загрузить статистику.');
-        res.render('admin/dashboard', {
+
+        res.render('pages/admin/dashboard', {
             title: 'Панель управления',
             activePage: 'dashboard',
+            user: req.user,
             stats: {}
         });
     }
+};
+
+exports.renderInvite = (req, res) => {
+    res.render('pages/auth/invite', {
+        title: 'Приглашение сотрудника',
+        activePage: 'invite'
+    });
 };
 
 /**
@@ -28,14 +38,14 @@ exports.renderDashboard = async (req, res) => {
  */
 exports.getDashboardStats = async (req, res) => {
     try {
-        // Общее количество ветеринаров
-        const vetsCount = await db('vets').count('id as count').first();
+        // общее количество клиентов
+        const clientsCount = await db('users').where('role', 'Client').count('userid as count').first();
 
-        // Количество активных ветеринаров
-        const activeVetsCount = await db('vets').where('is_active', true).count('id as count').first();
+        // Общее количество ветеринаров
+        const vetsCount = await db('users').where('role', 'Vet').count('userid as count').first();
 
         // Количество питомцев
-        const petsCount = await db('pets').count('id as count').first();
+        const petsCount = await db('pets').count('petid as count').first();
 
         // Количество приемов на сегодня
         const today = new Date();
@@ -43,16 +53,20 @@ exports.getDashboardStats = async (req, res) => {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
+        // Количество приемов всего
+        const appointmentsCount = await db('appointments').where('status', 'completed').count('appointmentid as count').first();
+
+        // Количество приемов на сегодня
         const todayAppointments = await db('appointments')
-            .where('appointment_date', '>=', today)
-            .andWhere('appointment_date', '<', tomorrow)
-            .count('id as count')
+            .where('date', '>=', today)
+            .andWhere('date', '<', tomorrow)
+            .count('appointmentid as count')
             .first();
 
         // Получение статистики приемов по статусам
         const appointmentsByStatus = await db('appointments')
             .select('status')
-            .count('id as count')
+            .count('appointmentid as count')
             .groupBy('status');
 
         // Преобразуем в удобный формат для фронтенда
@@ -66,22 +80,27 @@ exports.getDashboardStats = async (req, res) => {
         lastYear.setFullYear(lastYear.getFullYear() - 1);
 
         const appointmentsByMonth = await db('appointments')
-            .select(db.raw('EXTRACT(MONTH FROM appointment_date) as month'))
-            .select(db.raw('EXTRACT(YEAR FROM appointment_date) as year'))
-            .count('id as count')
-            .where('appointment_date', '>=', lastYear)
+            .select(db.raw('EXTRACT(MONTH FROM date) as month'))
+            .select(db.raw('EXTRACT(YEAR FROM date) as year'))
+            .count('appointmentid as count')
+            .where('date', '>=', lastYear)
             .groupBy('month', 'year')
             .orderBy('year', 'asc')
             .orderBy('month', 'asc');
 
         // Формируем ответ
         const stats = {
+            clients: {
+                total: clientsCount.count,
+            },
             vets: {
                 total: vetsCount.count,
-                active: activeVetsCount.count
             },
-            pets: petsCount.count,
+            pets: {
+                total: petsCount.count,
+            },
             appointments: {
+                total: appointmentsCount.count,
                 today: todayAppointments.count,
                 byStatus: statusCounts,
                 byMonth: appointmentsByMonth
@@ -103,25 +122,79 @@ exports.getDashboardStats = async (req, res) => {
 };
 
 /**
+ * Отображение страницы клиентов
+ */
+exports.renderClients = async (req, res) => {
+    try {
+        const clients = await db('users')
+            .select('userid', 'username', 'email', 'name', 'role', 'avatar')
+            .where('role', 'Client')
+            .orderBy('name', 'asc');
+        console.log(clients);
+        res.render('pages/employee/clients', {
+            title: 'Управление клиентами',
+            activePage: 'clients',
+            user: req.user,
+            clients
+        });
+    } catch (err) {
+        logger.error(`Ошибка при получении списка клиентов: ${err.message}`);
+
+        res.render('pages/employee/clients', {
+            title: 'Управление клиентами',
+            activePage: 'clients',
+            user: req.user,
+            clients: []
+        });
+    }
+};
+
+exports.getClientDetails = async (req, res) => {
+    try {
+        const clientId = req.params.id;
+        const client = await db('users')
+            .select('userid', 'name', 'email', 'phoneNumber', 'role', 'avatar', 'username')
+            .where('userid', clientId)
+            .first();
+
+        if (!client) {
+            return res.status(404).json({ error: 'Клиент не найден' });
+        }
+
+        const pets = await db('pets')
+            .select('petid', 'name', 'breed', 'age', 'gender', 'medicalhistory', 'type')
+            .where('userid', clientId)
+            .orderBy('name', 'asc');
+
+        return res.json({ client, pets });
+    } catch (err) {
+        logger.error(`Ошибка при получении данных клиента: ${err.message}`);
+    }
+};
+
+/**
  * Отображение страницы ветеринаров
  */
 exports.renderVets = async (req, res) => {
     try {
-        const vets = await db('vets')
-            .select('*')
-            .orderBy('last_name', 'asc');
+        const vets = await db('users')
+            .select('userid', 'name', 'email', 'phoneNumber', 'role', 'avatar')
+            .where('role', 'Vet')
+            .orderBy('name', 'asc');
 
-        res.render('admin/vets/index', {
+        res.render('pages/admin/vets', {
             title: 'Управление ветеринарами',
             activePage: 'vets',
+            user: req.user,
             vets
         });
     } catch (err) {
         logger.error(`Ошибка при получении списка ветеринаров: ${err.message}`);
-        res.addError('Ошибка при загрузке данных ветеринаров');
-        res.render('admin/vets/index', {
+
+        res.render('pages/admin/vets', {
             title: 'Управление ветеринарами',
             activePage: 'vets',
+            user: req.user,
             vets: []
         });
     }
@@ -150,7 +223,7 @@ exports.renderEditVetForm = async (req, res) => {
             .first();
 
         if (!vet) {
-            res.addError('Ветеринар не найден');
+
             return res.redirect('/admin/vets');
         }
 
@@ -162,7 +235,7 @@ exports.renderEditVetForm = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при получении данных ветеринара: ${err.message}`);
-        res.addError('Ошибка при загрузке данных ветеринара');
+
         res.redirect('/admin/vets');
     }
 };
@@ -173,18 +246,18 @@ exports.renderEditVetForm = async (req, res) => {
 exports.renderAppointments = async (req, res) => {
     try {
         // Получение параметров фильтрации
-        const { date, status, vet_id } = req.query;
+        const { date, status, vetId } = req.query;
 
         // Базовый запрос
         let query = db('appointments')
-            .join('pets', 'appointments.pet_id', 'pets.id')
-            .join('vets', 'appointments.vet_id', 'vets.id')
+            .join('pets', 'appointments.petid', 'pets.petid')
+            .join('users', 'appointments.vetid', 'users.userid')
             .select(
                 'appointments.*',
-                'pets.name as pet_name',
-                'pets.species as pet_species',
-                'vets.first_name as vet_first_name',
-                'vets.last_name as vet_last_name'
+                'pets.name as petName',
+                'pets.type as petType',
+                'users.name as vetName',
+                'users.username as vetUsername'
             );
 
         // Применение фильтров
@@ -194,42 +267,44 @@ exports.renderAppointments = async (req, res) => {
             nextDay.setDate(nextDay.getDate() + 1);
 
             query = query
-                .where('appointment_date', '>=', filterDate)
-                .andWhere('appointment_date', '<', nextDay);
+                .where('date', '>=', filterDate)
+                .andWhere('date', '<', nextDay);
         }
 
         if (status) {
             query = query.where('appointments.status', status);
         }
 
-        if (vet_id) {
-            query = query.where('appointments.vet_id', vet_id);
+        if (vetId) {
+            query = query.where('appointments.vetid', vetId);
         }
 
         // Получение списка
-        const appointments = await query.orderBy('appointment_date', 'desc');
+        const appointments = await query.orderBy('date', 'desc');
 
         // Получение списка ветеринаров для фильтра
-        const vets = await db('vets')
-            .select('id', 'first_name', 'last_name')
-            .where('is_active', true)
-            .orderBy('last_name', 'asc');
+        const vets = await db('users')
+            .select('userid', 'name', 'username')
+            .where('role', 'Vet')
+            .orderBy('name', 'asc');
 
-        res.render('admin/appointments/index', {
+        res.render('pages/employee/appointments', {
             title: 'Управление приемами',
             activePage: 'appointments',
             appointments,
             vets,
-            filters: { date, status, vet_id }
+            user: req.user,
+            filters: { date, status, vetId }
         });
     } catch (err) {
         logger.error(`Ошибка при получении списка приемов: ${err.message}`);
-        res.addError('Ошибка при загрузке данных приемов');
-        res.render('admin/appointments/index', {
+
+        res.render('pages/employee/appointments', {
             title: 'Управление приемами',
             activePage: 'appointments',
             appointments: [],
             vets: [],
+            user: req.user,
             filters: {}
         });
     }
@@ -242,7 +317,7 @@ exports.renderAppointmentDetails = async (req, res) => {
     try {
         const appointment = await db('appointments')
             .join('pets', 'appointments.pet_id', 'pets.id')
-            .join('vets', 'appointments.vet_id', 'vets.id')
+            .join('vets', 'appointments.vetId', 'vets.id')
             .leftJoin('clients', 'pets.owner_id', 'clients.id')
             .select(
                 'appointments.*',
@@ -261,7 +336,7 @@ exports.renderAppointmentDetails = async (req, res) => {
             .first();
 
         if (!appointment) {
-            res.addError('Прием не найден');
+
             return res.redirect('/admin/appointments');
         }
 
@@ -272,7 +347,7 @@ exports.renderAppointmentDetails = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при получении данных приема: ${err.message}`);
-        res.addError('Ошибка при загрузке данных приема');
+
         res.redirect('/admin/appointments');
     }
 };
@@ -283,15 +358,15 @@ exports.renderAppointmentDetails = async (req, res) => {
 exports.renderPets = async (req, res) => {
     try {
         // Получение параметров фильтрации
-        const { name, species } = req.query;
+        const { name, type, ownerId } = req.query;
 
         // Базовый запрос
         let query = db('pets')
-            .leftJoin('clients', 'pets.owner_id', 'clients.id')
+            .leftJoin('users', 'pets.userid', 'users.userid')
             .select(
                 'pets.*',
-                'clients.first_name as owner_first_name',
-                'clients.last_name as owner_last_name'
+                'users.name as ownerName',
+                'users.username as ownerUsername'
             );
 
         // Применение фильтров
@@ -299,33 +374,45 @@ exports.renderPets = async (req, res) => {
             query = query.whereRaw('LOWER(pets.name) LIKE ?', [`%${name.toLowerCase()}%`]);
         }
 
-        if (species) {
-            query = query.where('pets.species', species);
+        if (type) {
+            query = query.where('pets.type', type);
+        }
+
+        if (ownerId) {
+            query = query.where('pets.userid', ownerId);
         }
 
         // Получение списка
         const pets = await query.orderBy('pets.name', 'asc');
 
         // Получение уникальных видов для фильтра
-        const speciesList = await db('pets')
-            .distinct('species')
-            .orderBy('species', 'asc');
+        const typeList = await db('pets')
+            .distinct('type')
+            .orderBy('type', 'asc');
 
-        res.render('admin/pets/index', {
+        const clients = await db('users')
+            .select('userid', 'name', 'username')
+            .where('role', 'Client')
+            .orderBy('name', 'asc');
+
+        res.render('pages/employee/pets', {
             title: 'Управление питомцами',
             activePage: 'pets',
             pets,
-            speciesList: speciesList.map(s => s.species),
-            filters: { name, species }
+            user: req.user,
+            typeList: typeList.map(t => t.type),
+            clients,
+            filters: { name, type }
         });
     } catch (err) {
         logger.error(`Ошибка при получении списка питомцев: ${err.message}`);
-        res.addError('Ошибка при загрузке данных питомцев');
-        res.render('admin/pets/index', {
+
+        res.render('pages/employee/pets', {
             title: 'Управление питомцами',
             activePage: 'pets',
             pets: [],
-            speciesList: [],
+            typeList: [],
+            user: req.user,
             filters: {}
         });
     }
@@ -350,20 +437,20 @@ exports.renderPetDetails = async (req, res) => {
             .first();
 
         if (!pet) {
-            res.addError('Питомец не найден');
+
             return res.redirect('/admin/pets');
         }
 
         // Получение истории приемов
         const appointments = await db('appointments')
-            .join('vets', 'appointments.vet_id', 'vets.id')
+            .join('vets', 'appointments.vetId', 'vets.id')
             .select(
                 'appointments.*',
                 'vets.first_name as vet_first_name',
                 'vets.last_name as vet_last_name'
             )
             .where('pet_id', pet.id)
-            .orderBy('appointment_date', 'desc');
+            .orderBy('date', 'desc');
 
         res.render('admin/pets/details', {
             title: 'Детали питомца',
@@ -373,7 +460,7 @@ exports.renderPetDetails = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при получении данных питомца: ${err.message}`);
-        res.addError('Ошибка при загрузке данных питомца');
+
         res.redirect('/admin/pets');
     }
 };
@@ -394,7 +481,7 @@ exports.renderSettings = async (req, res) => {
         });
     } catch (err) {
         logger.error(`Ошибка при получении настроек: ${err.message}`);
-        res.addError('Ошибка при загрузке настроек');
+
         res.render('admin/settings', {
             title: 'Настройки клиники',
             activePage: 'settings',
@@ -480,7 +567,7 @@ exports.updateSettings = async (req, res) => {
             return res.status(500).json({ error: 'Не удалось обновить настройки' });
         }
 
-        res.addError('Ошибка при обновлении настроек');
+
         res.redirect('/admin/settings');
     }
 }; 

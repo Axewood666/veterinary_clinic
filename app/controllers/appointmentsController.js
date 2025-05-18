@@ -135,7 +135,7 @@ exports.create = async (req, res) => {
         }, 'appointmentid');
 
         const newAppointment = await db('appointments')
-            .where('appointmentid', appointmentid)
+            .where('appointmentid', appointmentid.appointmentid)
             .first();
 
         res.status(201).json(newAppointment);
@@ -222,17 +222,22 @@ exports.createAppointment = async (req, res) => {
             pet_name,
             pet_type,
             pet_age,
+            pet_breed,
+            pet_gender,
             owner_name,
             owner_phone,
             owner_email,
             vetid,
-            appointment_date,
-            appointment_time,
-            reason
+            date,
+            time,
+            comment,
+            type
         } = req.body;
 
         // Валидация данных
-        if (!pet_name || !owner_name || !owner_phone || !vetid || !appointment_date || !appointment_time || !reason) {
+        if (!pet_name || !pet_type || !pet_age || !pet_breed || !pet_gender ||
+            !owner_name || !owner_phone || !owner_email ||
+            !vetid || !date || !time || !comment || !type) {
             // Перенаправляем с ошибкой и сохраненными данными формы
             const formData = encodeURIComponent(JSON.stringify(req.body));
             return res.redirect(`/appointment?error=Пожалуйста, заполните все обязательные поля&formData=${formData}`);
@@ -261,7 +266,7 @@ exports.createAppointment = async (req, res) => {
             [userid] = await db('users').insert({
                 username: owner_phone.replace(/[^\d]/g, ''),
                 name: owner_name,
-                email: owner_email || `${owner_phone.replace(/[^\d]/g, '')}@example.com`,
+                email: owner_email,
                 phoneNumber: owner_phone,
                 role: 'Client',
                 password: hashedPassword
@@ -277,27 +282,36 @@ exports.createAppointment = async (req, res) => {
 
         if (existingPet) {
             petid = existingPet.petid;
+            // Обновляем данные питомца
+            await db('pets')
+                .where('petid', petid)
+                .update({
+                    type: pet_type,
+                    breed: pet_breed,
+                    age: pet_age,
+                    gender: pet_gender
+                });
         } else {
             // Создание нового питомца
             [petid] = await db('pets').insert({
                 name: pet_name,
-                type: pet_type || 'other',
-                breed: 'Не указано',
-                age: pet_age || 0,
-                gender: 'male', // По умолчанию
+                type: pet_type,
+                breed: pet_breed,
+                age: pet_age,
+                gender: pet_gender,
                 userid,
                 medicalhistory: ''
             }, 'petid');
         }
 
         // Парсинг даты и времени
-        const appointmentDate = new Date(appointment_date);
+        const appointmentDate = new Date(date);
 
         // Проверка доступности времени
         const conflictingAppointment = await db('appointments')
             .where('vetid', vetid)
             .where('date', appointmentDate)
-            .where('time', appointment_time)
+            .where('time', time)
             .where('status', '!=', 'cancelled')
             .first();
 
@@ -312,11 +326,11 @@ exports.createAppointment = async (req, res) => {
             petid,
             vetid,
             date: appointmentDate,
-            time: appointment_time,
-            type: 'consultation',
+            time: time,
+            type: type,
             status: 'scheduled',
             clientId: userid,
-            comment: reason
+            comment: comment
         });
 
         // Перенаправление на страницу благодарности

@@ -37,8 +37,8 @@ block content
               th Действия
           tbody
             each pet in pets
-              tr(data-petid=pet.petId)
-                td= pet.petId
+              tr(data-petid=pet.petid)
+                td= pet.petid
                 td= pet.name
                 td= pet.type
                 td= pet.breed
@@ -46,9 +46,9 @@ block content
                 td= pet.gender
                 td= pet.ownerName
                 td
-                  button.view-btn(data-petid=pet.petId) Просмотр
-                  button.edit-btn(data-petid=pet.petId) Редактировать
-                  button.delete-btn(data-petid=pet.petId) Удалить
+                  button.view-btn(data-petid=pet.petid) Просмотр
+                  button.edit-btn(data-petid=pet.petid) Редактировать
+                  button.delete-btn(data-petid=pet.petid) Удалить
 
         .pet-details#petDetails
           .details-header
@@ -144,18 +144,18 @@ block scripts
         const tbody = document.querySelector('.pets-table tbody');
         if (pets.length > 0) {
           tbody.innerHTML = pets.map(pet => `
-            <tr data-petid="${pet.petId}">
-              <td>${pet.petId}</td>
+            <tr data-petid="${pet.petid}">
+              <td>${pet.petid}</td>
               <td>${pet.name}</td>
               <td>${pet.type}</td>
               <td>${pet.breed || 'Н/Д'}</td>
               <td>${pet.age || 'Н/Д'}</td>
               <td>${pet.gender || 'Н/Д'}</td>
-              <td>${pet.ownerName}</td>
+              <td>${pet.ownerName || 'Н/Д'}</td>
               <td>
-                <button class="view-btn" data-petid="${pet.petId}">Просмотр</button>
-                <button class="edit-btn" data-petid="${pet.petId}">Редактировать</button>
-                <button class="delete-btn" data-petid="${pet.petId}">Удалить</button>
+                <button class="view-btn" data-petid="${pet.petid}">Просмотр</button>
+                <button class="edit-btn" data-petid="${pet.petid}">Редактировать</button>
+                <button class="delete-btn" data-petid="${pet.petid}">Удалить</button>
               </td>
             </tr>
           `).join('');
@@ -183,13 +183,13 @@ block scripts
       }
 
       function updatePetDetails(petData) {
-        document.getElementById('detailId').textContent = petData.petId;
+        document.getElementById('detailId').textContent = petData.petid;
         document.getElementById('detailName').textContent = petData.name;
         document.getElementById('detailType').textContent = petData.type;
         document.getElementById('detailBreed').textContent = petData.breed || 'Н/Д';
         document.getElementById('detailAge').textContent = petData.age || 'Н/Д';
         document.getElementById('detailGender').textContent = petData.gender || 'Н/Д';
-        document.getElementById('detailOwner').textContent = petData.ownerName;
+        document.getElementById('detailOwner').textContent = petData.ownerName || 'Н/Д';
         document.getElementById('detailMedicalHistory').textContent = petData.medicalHistory || 'Н/Д';
         
         document.getElementById('petDetails').classList.add('active');
@@ -200,7 +200,7 @@ block scripts
           const appointmentsList = document.getElementById('appointmentsList');
           appointmentsList.innerHTML = '<p>Загрузка приемов...</p>';
           
-          const response = await fetch(`${BACKEND_URL}/api/pets/${petId}/appointments`, {
+          const response = await fetch(`${BACKEND_URL}/api/pets/${petId}/history`, {
             method: 'GET',
             credentials: 'include'
           });
@@ -220,7 +220,7 @@ block scripts
         if (appointments.length > 0) {
           appointmentsList.innerHTML = appointments.map(appointment => `
             <div class="appointment-item">
-              <h4>Прием #${appointment.appointmentId}</h4>
+              <h4>Прием #${appointment.appointmentid}</h4>
               <p>Дата: ${new Date(appointment.date).toLocaleDateString()}</p>
               <p>Время: ${appointment.time}</p>
               <p>Ветеринар: ${appointment.vetName}</p>
@@ -242,15 +242,10 @@ block scripts
             method: 'DELETE',
             credentials: 'include'
           });
-          if (!response.ok) throw new Error('Не удалось удалить питомца');
-          
-          const result = await response.json();
-          if (result.success) {
-            location.reload();
-          }
+          if (!response.ok) throw new Error("Не удалось удалить питомца, так как у него имеются записи о приемах. Пожалуйста, сначала удалите или архивируйте связанные приемы.");
+          location.reload();
         } catch (error) {
-          console.error('Ошибка при удалении питомца:', error);
-          alert('Ошибка при удалении питомца');
+          alert(error.message);
         }
       }
 

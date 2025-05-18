@@ -18,7 +18,7 @@ exports.requireAuth = (req, res, next) => {
 };
 
 exports.requireAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
+    if (!req.user || req.user.role !== 'Admin') {
         // Если запрос к API, возвращаем ошибку в формате JSON
         if (req.originalUrl.startsWith('/api')) {
             return res.status(403).json({ error: 'Доступ запрещен' });
@@ -36,7 +36,7 @@ exports.requireAdmin = (req, res, next) => {
 };
 
 exports.requireVet = (req, res, next) => {
-    if (!req.user || (req.user.role !== 'vet' && req.user.role !== 'admin')) {
+    if (!req.user || (req.user.role !== 'Vet' && req.user.role !== 'Admin')) {
         // Если запрос к API, возвращаем ошибку в формате JSON
         if (req.originalUrl.startsWith('/api')) {
             return res.status(403).json({ error: 'Доступ запрещен' });
@@ -51,4 +51,21 @@ exports.requireVet = (req, res, next) => {
     }
 
     next();
-}; 
+};
+
+exports.requireEmployee = (req, res, next) => {
+    if (!req.user || !['Admin', 'Vet', 'Manager'].includes(req.user.role)) {
+        if (req.originalUrl.startsWith('/api')) {
+            return res.status(403).json({ error: 'Доступ запрещен' });
+        }
+
+        return res.status(403).render('pages/error', {
+            title: 'Доступ запрещен',
+            message: 'У вас нет прав для доступа к этой странице',
+            error: { message: 'Требуются права сотрудника' }
+        });
+    }
+
+
+    next();
+};

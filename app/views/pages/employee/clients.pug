@@ -60,7 +60,7 @@ block content
 
 block scripts
   script.
-    const BACKEND_URL = '!{backEndUrl}' || window.location.origin.replace(':3000', ':3001');
+    const BACKEND_URL = '!{backEndUrl}';
     
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('addClientBtn')?.addEventListener('click', showAddClientModal);
@@ -91,15 +91,15 @@ block scripts
 
       async function fetchClientDetails(clientId) {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/clients/${clientId}`, {
+          const response = await fetch(`${BACKEND_URL}/employee/clients/${clientId}`, {
             method: 'GET',
             credentials: 'include'
         });
           if (!response.ok) throw new Error('Client not found');
           
           const clientData = await response.json();
-          updateClientDetails(clientData);
-          await fetchPets(clientId);
+          updateClientDetails(clientData.client);
+          renderPets(clientData.pets);
           
         } catch (error) {
           console.error('Error fetching client details:', error);
@@ -118,30 +118,9 @@ block scripts
         document.getElementById('clientDetails').classList.add('active');
       }
 
-      async function fetchPets(clientId) {
-        try {
-          const petsList = document.getElementById('petsList');
-          petsList.innerHTML = '<p>Loading pets...</p>';
-          
-          const response = await fetch(`${BACKEND_URL}/api/clients/${clientId}/pets`, {
-            method: 'GET',
-            credentials: 'include'
-          });
-          if (!response.ok) throw new Error('Failed to load pets');
-          
-          const pets = await response.json();
-          renderPets(pets);
-          
-        } catch (error) {
-          console.error('Error fetching pets:', error);
-          petsList.innerHTML = '<p>Error loading pets</p>';
-        }
-      }
-
       function renderPets(pets) {
         const petsList = document.getElementById('petsList');
-        if (pets.pets.length > 0) {
-          pets = pets.pets
+        if (pets.length > 0) {
           petsList.innerHTML = pets.map(pet => `
             <div class="pet-item">
               <h4 id=${pet.petId}>${pet.name}</h4>

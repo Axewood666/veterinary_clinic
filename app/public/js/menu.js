@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const signupButton = document.getElementById('signup-button');
-    if (signupButton) {
-        signupButton.addEventListener('click', function () {
-            window.location.href = '/auth/register';
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function () {
+            window.location.href = '/auth/logout';
         });
     }
 })

@@ -1,0 +1,24 @@
+doctype html
+html
+  head
+    title= title || 'Ветеринарная клиника'
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/layout.css")
+    link(rel="stylesheet", href="/css/index.css")
+    block styles
+
+  body
+    include ../partials/header.pug
+    
+    main.main-content
+      block content
+    
+    include ../partials/footer.pug
+    
+    script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js")
+    script(src="/js/menu.js")
+    block scripts 

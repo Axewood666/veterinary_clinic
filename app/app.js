@@ -29,11 +29,17 @@ app.use(morgan(morganFormat, { stream: logger.stream }));
 const fetchUser = require('./middlewares/fetchUser');
 app.use(fetchUser);
 
+if (process.env.LOG_API_REQUESTS === 'true') {
+    const logApiRequests = require('./middlewares/logApiRequests');
+    app.use(logApiRequests);
+}
+
 // Подключение маршрутов
 app.use('/', require('./routes/index'));
 app.use('/api', require('./routes/api'));
 app.use('/admin', require('./routes/admin'));
 app.use('/auth', require('./routes/auth'));
+app.use('/employee', require('./routes/employee'));
 
 // Обработка ошибок
 app.use((err, req, res, next) => {

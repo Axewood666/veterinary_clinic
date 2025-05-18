@@ -100,14 +100,24 @@ button.signin:hover {
     color: white;
 }
 
-button.logout {
-    background-color: #95a5a6;
-    color: white;
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: #555;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-button.logout:hover {
-    background-color: #7f8c8d;
-    color: white;
+.logout-btn:hover {
+    color: #222;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .footer {
