@@ -26,6 +26,11 @@ html(lang="en")
               a(href="/admin/vets", class=activePage === 'vets' ? 'active' : '')
                 i.fas.fa-user-md
                 span Veterinarians
+            if user.role === 'Admin'
+              li
+              a(href="/admin/managers", class=activePage === 'managers' ? 'active' : '')
+                i.fas.fa-user-tie
+                span Managers
             if user.role === 'Admin' || user.role === 'Manager' || user.role === 'Vet'
               li
               a(href="/employee/clients", class=activePage === 'clients' ? 'active' : '')

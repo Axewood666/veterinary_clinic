@@ -1,0 +1,139 @@
+extends ../../layouts/client.pug
+
+block content
+  h1.page-title Личный кабинет
+  
+  .dashboard-stats
+    .row
+      .col-md-4
+        .stats-card
+          h3 Мои питомцы
+          .stats-number= pets.length
+          a.btn.btn-primary.btn-sm(href="/client/pets") Просмотреть всех
+          
+      .col-md-4
+        .stats-card
+          h3 Ближайшие приемы
+          .stats-number= upcomingAppointments.length
+          a.btn.btn-primary.btn-sm(href="/client/appointments") Все записи
+          
+      .col-md-4
+        .stats-card
+          h3 Всего приемов
+          .stats-number= upcomingAppointments.length + pastAppointments.length
+          a.btn.btn-primary.btn-sm(href="/client/appointments?status=completed") История
+  
+  .row.mt-4
+    .col-md-6
+      .card
+        .card-header.d-flex.justify-content-between.align-items-center
+          h2 Мои питомцы
+          a.btn.btn-sm.btn-success(href="/client/pets/add") 
+            i.bi.bi-plus
+            span Добавить питомца
+        .card-body
+          if pets.length > 0
+            .pets-list
+              each pet in pets
+                .pet-card.mb-3
+                  .pet-info
+                    h3= pet.name
+                    p 
+                      strong Вид: 
+                      span
+                        if pet.type === 'dog'
+                          | Собака
+                        else if pet.type === 'cat'
+                          | Кошка
+                        else if pet.type === 'bird'
+                          | Птица
+                        else if pet.type === 'fish'
+                          | Рыба
+                        else
+                          | Другое
+                    p
+                      strong Порода: 
+                      span= pet.breed
+                    p
+                      strong Возраст: 
+                      span
+                        - var ageText = 'лет';
+                        - if (pet.age === 1) ageText = 'год';
+                        - else if (pet.age > 1 && pet.age < 5) ageText = 'года';
+                        | #{pet.age} #{ageText}
+                  .pet-actions
+                    a.btn.btn-info.btn-sm(href=`/client/pets/${pet.petid}`) Подробнее
+                    a.btn.btn-primary.btn-sm(href=`/client/pets/${pet.petid}/history`) История
+                    a.btn.btn-success.btn-sm(href=`/appointment?petid=${pet.petid}`) Записать
+          else
+            .alert.alert-info
+              p У вас пока нет добавленных питомцев
+              a.btn.btn-primary.mt-2(href="/client/pets/add") Добавить питомца
+    
+    .col-md-6
+      .card
+        .card-header.d-flex.justify-content-between.align-items-center
+          h2 Ближайшие приемы
+          a.btn.btn-sm.btn-primary(href="/appointment") 
+            i.bi.bi-calendar-plus
+            span Записаться
+        .card-body
+          if upcomingAppointments.length > 0
+            .appointments-list
+              each appointment in upcomingAppointments
+                .appointment-card.mb-3.p-3.border.rounded
+                  .d-flex.justify-content-between
+                    .appointment-date
+                      strong= new Date(appointment.date).toLocaleDateString('ru-RU')
+                      |  
+                      span= appointment.time
+                    .appointment-status
+                      - var badgeClass = appointment.status === 'scheduled' ? 'bg-warning' : 'bg-success'
+                      span.badge(class=badgeClass)
+                        if appointment.status === 'scheduled'
+                          | Запланирован
+                        else
+                          | Подтвержден
+                  .appointment-info.mt-2
+                    p
+                      strong Питомец: 
+                      span= appointment.pet_name
+                    p
+                      strong Ветеринар: 
+                      span= appointment.vet_name
+                    p
+                      strong Тип приема: 
+                      span
+                        if appointment.type === 'consultation'
+                          | Консультация
+                        else if appointment.type === 'vaccination'
+                          | Вакцинация
+                        else
+                          | Другое
+                  .appointment-actions.mt-2
+                    a.btn.btn-info.btn-sm(href=`/client/appointments/${appointment.appointmentid}`) Детали
+                    button.btn.btn-danger.btn-sm.cancel-appointment(data-id=appointment.appointmentid) Отменить
+          else
+            .alert.alert-info
+              p У вас нет запланированных приемов
+              a.btn.btn-primary.mt-2(href="/appointment") Записаться на прием
+
+block scripts
+  script.
+    // Обработка отмены приема
+    document.addEventListener('DOMContentLoaded', function() {
+      const cancelButtons = document.querySelectorAll('.cancel-appointment');
+      
+      cancelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const appointmentId = this.getAttribute('data-id');
+          if (confirm('Вы уверены, что хотите отменить этот прием?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/client/appointments/${appointmentId}/cancel`;
+            document.body.appendChild(form);
+            form.submit();
+          }
+        });
+      });
+    });

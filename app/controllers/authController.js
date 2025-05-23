@@ -207,10 +207,80 @@ exports.sendInvite = async (req, res) => {
     }
 };
 
+/**
+ * Отображение формы регистрации по приглашению
+ */
+exports.renderInviteRegister = async (req, res) => {
+    const { token } = req.params;
+    
+    try {
+        const invite = await db('invitation_tokens')
+            .whereRaw('token::text = ?', [token])
+            .where('used', false)
+            .whereRaw('expires_at > NOW()')
+            .first();
+            
+        if (!invite) {
+            return res.render('pages/auth/invite-register', {
+                title: 'Регистрация по приглашению',
+                tokenError: true
+            });
+        }
+        
+        res.render('pages/auth/invite-register', {
+            title: 'Регистрация по приглашению',
+            email: invite.email,
+            role: invite.role,
+            token: token
+        });
+    } catch (err) {
+        logger.error(`Ошибка при отображении формы регистрации по приглашению: ${err.message}`);
+        res.render('pages/auth/invite-register', {
+            title: 'Регистрация по приглашению',
+            error: 'Произошла ошибка. Пожалуйста, попробуйте позже.'
+        });
+    }
+};
+
+/**
+ * Получение информации о приглашении по токену
+ */
+exports.getInviteInfo = async (req, res) => {
+    const { token } = req.query;
+    if (!token) {
+        return res.status(400).json({ message: 'Токен не указан' });
+    }
+    
+    try {
+        const invite = await db('invitation_tokens')
+            .whereRaw('token::text = ?', [token])
+            .where('used', false)
+            .whereRaw('expires_at > NOW()')
+            .first();
+            
+        if (!invite) {
+            return res.status(400).json({ message: 'Приглашение недействительно или срок его действия истек' });
+        }
+        
+        res.json({
+            email: invite.email,
+            role: invite.role,
+            expiresAt: invite.expires_at
+        });
+    } catch (err) {
+        logger.error(`Ошибка при получении информации о приглашении: ${err.message}`);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
 exports.registerByInvite = async (req, res) => {
     const { username, password, token } = req.body;
     try {
-        const invite = await db('invitation_tokens').where('token', token).first();
+        const invite = await db('invitation_tokens')
+            .whereRaw('token::text = ?', [token])
+            .where('used', false)
+            .whereRaw('expires_at > NOW()')
+            .first();
         if (!invite) {
             return res.status(400).json({ message: 'Invalid token' });
         }
@@ -231,14 +301,22 @@ exports.registerByInvite = async (req, res) => {
             throw new Error('Failed to register. Please try again later.');
         }
 
-        await db('invitation_tokens').where('token', token).update({ used: true });
+        await db.raw('UPDATE invitation_tokens SET used = true WHERE token = ?', [token]);
 
         const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+
+        res.cookie('token', JWTtoken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000
+        });
 
         res.status(201).json({
             username: newUser.username,
             email: newUser.email,
-            token: JWTtoken
+            token: JWTtoken,
+            role: newUser.role
         });
     } catch (error) {
         res.status(500).json({

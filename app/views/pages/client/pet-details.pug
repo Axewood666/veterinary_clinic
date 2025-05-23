@@ -1,0 +1,202 @@
+extends ../../layouts/client.pug
+
+block content
+  .d-flex.align-items-center.mb-4
+    a.btn.btn-sm.btn-outline-secondary.me-3(href="/client/pets")
+      i.bi.bi-arrow-left
+      |  Назад к списку
+    h1.page-title.m-0= pet.name
+  
+  if success === 'updated'
+    .alert.alert-success.mb-4
+      p Информация о питомце успешно обновлена
+  
+  .row
+    .col-md-6
+      .card.mb-4
+        .card-header.d-flex.justify-content-between.align-items-center
+          h2 Информация о питомце
+          a.btn.btn-sm.btn-primary(href=`/client/pets/${pet.petid}/edit`)
+            i.bi.bi-pencil.me-1
+            | Редактировать
+        .card-body
+          .pet-details
+            .detail-item
+              .detail-label Вид:
+              .detail-value
+                if pet.type === 'dog'
+                  | Собака
+                else if pet.type === 'cat'
+                  | Кошка
+                else if pet.type === 'bird'
+                  | Птица
+                else if pet.type === 'fish'
+                  | Рыба
+                else
+                  | Другое
+            .detail-item
+              .detail-label Порода:
+              .detail-value= pet.breed
+            .detail-item
+              .detail-label Возраст:
+              .detail-value
+                - var ageText = 'лет';
+                - if (pet.age === 1) ageText = 'год';
+                - else if (pet.age > 1 && pet.age < 5) ageText = 'года';
+                | #{pet.age} #{ageText}
+            .detail-item
+              .detail-label Пол:
+              .detail-value
+                if pet.gender === 'male'
+                  | Самец
+                else
+                  | Самка
+          
+          if pet.medicalhistory
+            .mt-4
+              h4 История болезни
+              p.pet-medical-history= pet.medicalhistory
+          
+          .pet-actions.mt-4
+            a.btn.btn-success.me-2(href=`/appointment?petid=${pet.petid}`)
+              i.bi.bi-calendar-plus.me-1
+              | Записать на прием
+            a.btn.btn-warning.me-2(href=`/client/pets/${pet.petid}/history`)
+              i.bi.bi-clock-history.me-1
+              | История приемов
+            button.btn.btn-danger.delete-pet(data-id=pet.petid)
+              i.bi.bi-trash.me-1
+              | Удалить
+      
+    .col-md-6
+      .card
+        .card-header
+          h2 Последние приемы
+        .card-body.appointment-history
+          // Здесь будет история приемов
+          #appointmentsList.pet-appointments
+            .text-center.py-4
+              .spinner-border.text-primary(role="status")
+              p.mt-2 Загрузка истории приемов...
+
+block scripts
+  script.
+    // Удаление питомца
+    document.addEventListener('DOMContentLoaded', function() {
+      const deleteButton = document.querySelector('.delete-pet');
+      
+      if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+          const petId = this.getAttribute('data-id');
+          
+          if (confirm('Вы уверены, что хотите удалить этого питомца? Это действие нельзя отменить.')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/client/pets/${petId}/delete`;
+            document.body.appendChild(form);
+            form.submit();
+          }
+        });
+      }
+      
+      // Загрузка последних приемов
+      const petId = '#{pet.petid}';
+      fetch(`/api/pets/${petId}/history?limit=5`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка при получении данных');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const appointmentsList = document.getElementById('appointmentsList');
+          appointmentsList.innerHTML = '';
+          
+          if (data.length === 0) {
+            appointmentsList.innerHTML = '<div class="alert alert-info">У питомца пока нет записей о приемах</div>';
+            return;
+          }
+          
+          data.forEach(appointment => {
+            const date = new Date(appointment.date).toLocaleDateString('ru-RU');
+            
+            const appointmentCard = document.createElement('div');
+            appointmentCard.className = 'appointment-card mb-3 p-3 border rounded';
+            
+            appointmentCard.innerHTML = `
+              <div class="d-flex justify-content-between">
+                <div class="appointment-date">
+                  <strong>${date}</strong> ${appointment.time}
+                </div>
+                <div class="appointment-status">
+                  <span class="badge ${appointment.status === 'completed' ? 'bg-success' : 
+                                      appointment.status === 'cancelled' ? 'bg-danger' : 
+                                      appointment.status === 'accepted' ? 'bg-primary' : 'bg-warning'}">
+                    ${appointment.status === 'completed' ? 'Завершен' : 
+                      appointment.status === 'cancelled' ? 'Отменен' : 
+                      appointment.status === 'accepted' ? 'Подтвержден' : 'Запланирован'}
+                  </span>
+                </div>
+              </div>
+              <div class="appointment-info mt-2">
+                <p>
+                  <strong>Ветеринар:</strong> ${appointment.vet_name || 'Не указан'}
+                </p>
+                <p>
+                  <strong>Тип приема:</strong> ${appointment.type === 'consultation' ? 'Консультация' : 
+                                               appointment.type === 'vaccination' ? 'Вакцинация' : 'Другое'}
+                </p>
+                ${appointment.diagnosis ? `<p><strong>Диагноз:</strong> ${appointment.diagnosis}</p>` : ''}
+              </div>
+              <div class="appointment-actions mt-2">
+                <a href="/client/appointments/${appointment.appointmentid}" class="btn btn-info btn-sm">Подробнее</a>
+              </div>
+            `;
+            
+            appointmentsList.appendChild(appointmentCard);
+          });
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          const appointmentsList = document.getElementById('appointmentsList');
+          appointmentsList.innerHTML = '<div class="alert alert-danger">Ошибка при загрузке истории приемов</div>';
+        });
+    });
+
+block styles
+  style.
+    .pet-details {
+      padding: 1rem 0;
+    }
+    
+    .detail-item {
+      display: flex;
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 0.8rem;
+    }
+    
+    .detail-label {
+      font-weight: bold;
+      min-width: 100px;
+    }
+    
+    .pet-medical-history {
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      border-left: 4px solid #28a745;
+    }
+    
+    .appointment-history {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .appointment-card {
+      transition: all 0.2s ease;
+    }
+    
+    .appointment-card:hover {
+      background-color: #f8f9fa;
+    }

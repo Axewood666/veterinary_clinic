@@ -1,0 +1,123 @@
+extends ../../layouts/client.pug
+
+block content
+  .d-flex.align-items-center.mb-4
+    a.btn.btn-sm.btn-outline-secondary.me-3(href="/client/pets")
+      i.bi.bi-arrow-left
+      |  Назад к списку
+    h1.page-title.m-0 Добавление нового питомца
+  
+  .card
+    .card-header
+      h2 Информация о питомце
+    .card-body
+      form(action="/client/pets/add" method="POST")
+        .row
+          .col-md-6
+            .form-group.mb-3
+              label(for="name") Кличка питомца *
+              input.form-control#name(
+                type="text"
+                name="name"
+                value=formData.name || ''
+                required
+                placeholder="Введите кличку питомца"
+              )
+          
+          .col-md-6
+            .form-group.mb-3
+              label(for="type") Вид животного *
+              select.form-control#type(
+                name="type"
+                required
+              )
+                option(value="" disabled selected) Выберите вид животного
+                option(value="dog" selected=formData.type === 'dog') Собака
+                option(value="cat" selected=formData.type === 'cat') Кошка
+                option(value="bird" selected=formData.type === 'bird') Птица
+                option(value="fish" selected=formData.type === 'fish') Рыба
+                option(value="other" selected=formData.type === 'other') Другое
+        
+        .row
+          .col-md-6
+            .form-group.mb-3
+              label(for="breed") Порода *
+              input.form-control#breed(
+                type="text"
+                name="breed"
+                value=formData.breed || ''
+                required
+                placeholder="Введите породу"
+              )
+          
+          .col-md-6
+            .form-group.mb-3
+              label(for="age") Возраст (лет) *
+              input.form-control#age(
+                type="number"
+                name="age"
+                value=formData.age || ''
+                min="0"
+                step="1"
+                required
+                placeholder="Введите возраст"
+              )
+        
+        .row
+          .col-md-6
+            .form-group.mb-3
+              label(for="gender") Пол животного *
+              select.form-control#gender(
+                name="gender"
+                required
+              )
+                option(value="" disabled selected) Выберите пол
+                option(value="male" selected=formData.gender === 'male') Самец
+                option(value="female" selected=formData.gender === 'female') Самка
+        
+        .form-group.mb-3
+          label(for="medicalhistory") История болезни
+          textarea.form-control#medicalhistory(
+            name="medicalhistory"
+            rows="4"
+            placeholder="Введите информацию о прошлых заболеваниях, аллергиях и т.д."
+          )= formData.medicalhistory || ''
+        
+        .form-group.d-flex.justify-content-between.mt-4
+          a.btn.btn-secondary(href="/client/pets") Отмена
+          button.btn.btn-primary(type="submit") Добавить питомца
+
+block scripts
+  script.
+    // Валидация формы
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      
+      form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        // Проверка обязательных полей
+        const requiredFields = ['name', 'type', 'breed', 'age', 'gender'];
+        requiredFields.forEach(field => {
+          const input = document.getElementById(field);
+          if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+          } else {
+            input.classList.remove('is-invalid');
+          }
+        });
+        
+        // Проверка возраста
+        const age = document.getElementById('age');
+        if (parseInt(age.value) < 0) {
+          age.classList.add('is-invalid');
+          isValid = false;
+        }
+        
+        if (!isValid) {
+          event.preventDefault();
+          alert('Пожалуйста, заполните все обязательные поля корректно');
+        }
+      });
+    });

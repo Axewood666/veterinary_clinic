@@ -61,6 +61,16 @@ exports.seed = async function (knex) {
             phoneNumber: '+70987654321',
             name: 'Менеджер',
             avatar: null
+        },
+        {
+            userid: 5,
+            username: 'client2',
+            password: clientHash,
+            role: 'Client',
+            email: 'client2@mail.ru',
+            phoneNumber: '+71239876543',
+            name: 'Клиент 2',
+            avatar: null
         }
     ]);
 
@@ -162,6 +172,22 @@ exports.seed = async function (knex) {
             id: 2,
             vetid: 2,
             day: '3',
+            start_time: '10:00',
+            end_time: '17:00',
+            is_active: true
+        },
+        {
+            id: 3,
+            vetid: 2,
+            day: '5',
+            start_time: '10:00',
+            end_time: '17:00',
+            is_active: true
+        },
+        {
+            id: 4,
+            vetid: 2,
+            day: '6',
             start_time: '10:00',
             end_time: '17:00',
             is_active: true

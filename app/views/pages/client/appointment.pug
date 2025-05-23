@@ -1,0 +1,396 @@
+extends ../../layouts/client.pug
+
+block styles
+  style.
+    .form-steps .step {
+      display: none;
+    }
+    .form-steps .step.active {
+      display: block;
+    }
+    .pet-select-card {
+      padding: 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pet-select-card.selected {
+      border-color: #0d6efd;
+      background-color: rgba(13, 110, 253, 0.1);
+    }
+    .vet-card {
+      padding: 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+    }
+    .time-slot {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 5px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .time-slot:hover {
+      background-color: #f8f9fa;
+    }
+    .time-slot.selected {
+      background-color: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
+    }
+    .time-slot.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+block content
+  h1.page-title Запись на прием
+  
+  .card
+    .card-body
+      form#appointmentForm(method="post" action="/client/appointment")
+        .form-steps
+          .step.active#step1
+            h3 Шаг 1: Выбор питомца
+            .mb-4
+              h4 Выберите существующего питомца
+              if pets && pets.length > 0
+                .row
+                  each pet in pets
+                    .col-md-4.mb-3
+                      .pet-select-card(data-pet-id=pet.petid)
+                        h5= pet.name
+                        p 
+                          if pet.type === 'dog'
+                            | Собака 
+                          else if pet.type === 'cat'
+                            | Кошка
+                          else if pet.type === 'bird'
+                            | Птица
+                          else if pet.type === 'fish'
+                            | Рыба
+                          else
+                            | Другое
+                          |  - #{pet.breed}
+                        input(type="radio" name="petid" value=pet.petid class="visually-hidden pet-selector")
+              else
+                .alert.alert-info У вас пока нет добавленных питомцев
+            
+            .mb-3
+              h4 Или добавьте нового питомца
+              .form-check.mb-3
+                input.form-check-input#newPetCheckbox(type="checkbox" name="addNewPet")
+                label.form-check-label(for="newPetCheckbox") Добавить нового питомца
+              
+              #newPetForm.mt-3.d-none
+                .row
+                  .col-md-6
+                    .mb-3
+                      label.form-label(for="petName") Кличка*
+                      input.form-control#petName(type="text" name="petName" required)
+                  .col-md-6
+                    .mb-3
+                      label.form-label(for="petType") Вид*
+                      select.form-control#petType(name="petType" required)
+                        option(value="") Выберите вид
+                        option(value="dog") Собака
+                        option(value="cat") Кошка
+                        option(value="bird") Птица
+                        option(value="fish") Рыба
+                        option(value="other") Другое
+                .row
+                  .col-md-6
+                    .mb-3
+                      label.form-label(for="petBreed") Порода
+                      input.form-control#petBreed(type="text" name="petBreed")
+                  .col-md-6
+                    .mb-3
+                      label.form-label(for="petAge") Возраст*
+                      input.form-control#petAge(type="number" name="petAge" min="0" max="30" required)
+                .row
+                  .col-md-6
+                    .mb-3
+                      label.form-label(for="petGender") Пол*
+                      select.form-control#petGender(name="petGender" required)
+                        option(value="") Выберите пол
+                        option(value="male") Самец
+                        option(value="female") Самка
+            
+            .mt-4
+              button.btn.btn-primary.next-step(type="button" data-next="step2") Далее
+          
+          .step#step2
+            h3 Шаг 2: Выбор ветеринара и времени
+            
+            .form-group.mb-4
+              label.form-label(for="appointmentType") Тип приема*
+              select.form-control#appointmentType(name="appointmentType" required)
+                option(value="") Выберите тип приема
+                option(value="consultation") Консультация
+                option(value="vaccination") Вакцинация
+                option(value="surgery") Хирургическое вмешательство
+                option(value="therapy") Терапия
+                option(value="other") Другое
+            
+            .form-group.mb-4
+              label.form-label(for="appointmentDate") Дата приема*
+              input.form-control#appointmentDate(type="date" name="appointmentDate" min=new Date().toISOString().split('T')[0] required)
+            
+            #vetScheduleContainer.mb-4
+              h4 Доступные ветеринары
+              .alert.alert-info Выберите дату для просмотра доступных ветеринаров
+              
+              .vets-schedule-list.d-none
+                if vets && vets.length > 0
+                  each vet in vets
+                    .vet-card.mb-3
+                      h5= vet.name
+                      .vet-slots
+                        // Слоты будут заполнены через JavaScript
+                else
+                  .alert.alert-warning Нет доступных ветеринаров на выбранную дату
+            
+            .form-group.mb-4
+              label.form-label(for="notes") Примечания (симптомы, вопросы и т.д.)
+              textarea.form-control#notes(name="notes" rows="3")
+            
+            input#selectedVet(type="hidden" name="vetid")
+            input#selectedTime(type="hidden" name="time")
+            
+            .mt-4.d-flex.justify-content-between
+              button.btn.btn-secondary.prev-step(type="button" data-prev="step1") Назад
+              button.btn.btn-primary#submitAppointment(type="submit" disabled) Записаться на прием
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Шаги формы
+      const steps = document.querySelectorAll('.step');
+      const nextButtons = document.querySelectorAll('.next-step');
+      const prevButtons = document.querySelectorAll('.prev-step');
+      
+      // Переключение между шагами
+      nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const nextStep = this.dataset.next;
+          
+          // Валидация первого шага
+          if (nextStep === 'step2') {
+            const petSelected = document.querySelector('input[name="petid"]:checked');
+            const newPetChecked = document.querySelector('#newPetCheckbox').checked;
+            
+            if (!petSelected && !newPetChecked) {
+              alert('Выберите питомца или создайте нового');
+              return;
+            }
+            
+            if (newPetChecked) {
+              const requiredFields = document.querySelectorAll('#newPetForm [required]');
+              let isValid = true;
+              
+              requiredFields.forEach(field => {
+                if (!field.value) {
+                  isValid = false;
+                  field.classList.add('is-invalid');
+                } else {
+                  field.classList.remove('is-invalid');
+                }
+              });
+              
+              if (!isValid) {
+                alert('Заполните все обязательные поля для нового питомца');
+                return;
+              }
+            }
+          }
+          
+          steps.forEach(step => step.classList.remove('active'));
+          document.getElementById(nextStep).classList.add('active');
+        });
+      });
+      
+      prevButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const prevStep = this.dataset.prev;
+          steps.forEach(step => step.classList.remove('active'));
+          document.getElementById(prevStep).classList.add('active');
+        });
+      });
+      
+      // Выбор питомца
+      const petCards = document.querySelectorAll('.pet-select-card');
+      const newPetFormFields = document.querySelectorAll('#newPetForm [required]');
+      
+      // Функция для включения/отключения обязательных полей нового питомца
+      function toggleNewPetFieldsRequired(required) {
+        newPetFormFields.forEach(field => {
+          if (!required) {
+            field.removeAttribute('required');
+          } else {
+            field.setAttribute('required', '');
+          }
+        });
+      }
+      
+      petCards.forEach(card => {
+        card.addEventListener('click', function() {
+          const petId = this.dataset.petId;
+          const radio = this.querySelector('input[type="radio"]');
+          
+          petCards.forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          radio.checked = true;
+          
+          // Если выбираем питомца, снимаем флажок с "добавить нового"
+          document.querySelector('#newPetCheckbox').checked = false;
+          document.querySelector('#newPetForm').classList.add('d-none');
+          
+          // Отключаем обязательные поля для нового питомца
+          toggleNewPetFieldsRequired(false);
+        });
+      });
+      
+      // Инициализация - если питомец выбран, отключаем обязательные поля нового питомца
+      if (document.querySelector('input[name="petid"]:checked')) {
+        toggleNewPetFieldsRequired(false);
+      }
+      
+      // Показать/скрыть форму нового питомца
+      const newPetCheckbox = document.querySelector('#newPetCheckbox');
+      const newPetForm = document.querySelector('#newPetForm');
+      
+      newPetCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          newPetForm.classList.remove('d-none');
+          // Снимаем выбор с существующих питомцев
+          petCards.forEach(card => card.classList.remove('selected'));
+          document.querySelectorAll('input[name="petid"]').forEach(input => input.checked = false);
+          // Включаем обязательные поля для нового питомца
+          toggleNewPetFieldsRequired(true);
+        } else {
+          newPetForm.classList.add('d-none');
+          // Отключаем обязательные поля для нового питомца
+          toggleNewPetFieldsRequired(false);
+        }
+      });
+      
+      // Обработка выбора даты для загрузки доступных ветеринаров
+      const dateInput = document.querySelector('#appointmentDate');
+      dateInput.addEventListener('change', function() {
+        const selectedDate = this.value;
+        
+        if (!selectedDate) {
+          document.querySelector('.vets-schedule-list').classList.add('d-none');
+          document.querySelector('#vetScheduleContainer .alert').classList.remove('d-none');
+          return;
+        }
+        
+        document.querySelector('#vetScheduleContainer .alert').classList.add('d-none');
+        
+        // Запрос на получение доступных ветеринаров и времени
+        fetch(`/api/vets/schedule?date=${selectedDate}`)
+          .then(response => response.json())
+          .then(data => {
+            const vetsContainer = document.querySelector('.vets-schedule-list');
+            vetsContainer.classList.remove('d-none');
+            vetsContainer.innerHTML = '';
+            
+            if (data.length === 0) {
+              vetsContainer.innerHTML = '<div class="alert alert-warning">Нет доступных ветеринаров на выбранную дату</div>';
+              return;
+            }
+            
+            data.forEach(vet => {
+              const vetCard = document.createElement('div');
+              vetCard.className = 'vet-card mb-3';
+              
+              const vetHeader = document.createElement('div');
+              vetHeader.className = 'd-flex justify-content-between align-items-center mb-2';
+              vetHeader.innerHTML = `
+                <div>
+                  <h5>${vet.name}</h5>
+                  <p class="text-muted m-0">${vet.specialization || 'Общая практика'}</p>
+                </div>
+              `;
+              
+              const slotsContainer = document.createElement('div');
+              slotsContainer.className = 'vet-slots';
+              
+              if (vet.availableSlots && vet.availableSlots.length > 0) {
+                vet.availableSlots.forEach(slot => {
+                  const timeSlot = document.createElement('span');
+                  timeSlot.className = 'time-slot';
+                  timeSlot.textContent = slot;
+                  timeSlot.dataset.vetId = vet.userid;
+                  timeSlot.dataset.time = slot;
+                  
+                  timeSlot.addEventListener('click', function() {
+                    // Сброс всех выбранных слотов
+                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                    
+                    // Выбор текущего слота
+                    this.classList.add('selected');
+                    
+                    // Заполнение скрытых полей
+                    document.querySelector('#selectedVet').value = this.dataset.vetId;
+                    document.querySelector('#selectedTime').value = this.dataset.time;
+                    
+                    // Активация кнопки отправки
+                    document.querySelector('#submitAppointment').disabled = false;
+                  });
+                  
+                  slotsContainer.appendChild(timeSlot);
+                });
+              } else {
+                slotsContainer.innerHTML = '<p class="text-muted">Нет доступного времени</p>';
+              }
+              
+              vetCard.appendChild(vetHeader);
+              vetCard.appendChild(slotsContainer);
+              vetsContainer.appendChild(vetCard);
+            });
+          })
+          .catch(error => {
+            console.error('Ошибка при загрузке расписания:', error);
+            document.querySelector('.vets-schedule-list').innerHTML = '<div class="alert alert-danger">Ошибка при загрузке расписания ветеринаров</div>';
+          });
+      });
+      
+      // Валидация формы перед отправкой
+      const appointmentForm = document.querySelector('#appointmentForm');
+      appointmentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Проверка выбора питомца или заполнения формы нового питомца
+        const petSelected = document.querySelector('input[name="petid"]:checked');
+        const newPetChecked = document.querySelector('#newPetCheckbox').checked;
+        
+        if (!petSelected && !newPetChecked) {
+          alert('Выберите питомца или создайте нового');
+          return;
+        }
+        
+        // Проверка выбора даты, ветеринара и времени
+        const date = document.querySelector('#appointmentDate').value;
+        const type = document.querySelector('#appointmentType').value;
+        const vetId = document.querySelector('#selectedVet').value;
+        const time = document.querySelector('#selectedTime').value;
+        
+        if (!date || !type) {
+          alert('Выберите дату и тип приема');
+          return;
+        }
+        
+        if (!vetId || !time) {
+          alert('Выберите ветеринара и время приема');
+          return;
+        }
+        
+        // Отправка формы
+        this.submit();
+      });
+    });

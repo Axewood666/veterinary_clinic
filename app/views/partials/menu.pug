@@ -11,9 +11,10 @@ nav
           li: a(href="/employee/clients" class="nav-link") Clients
           li: a(href="/employee/pets" class="nav-link") Pets
         if user.role === 'Client'
-          li: a(href="/pets" class="nav-link") Pets
-          li: a(href="/appointments" class="nav-link") Appointments
-          li: a(href="/profile" class="nav-link") Profile
+          li: a(href="/client/dashboard" class="nav-link") Dashboard
+          li: a(href="/client/pets" class="nav-link") Pets
+          li: a(href="/client/appointments" class="nav-link") Appointments
+          li: a(href="/client/profile" class="nav-link") Profile
     .buttons  
       if user
         button.logout(id="logout-button") Выход

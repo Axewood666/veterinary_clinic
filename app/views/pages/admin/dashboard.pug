@@ -18,6 +18,12 @@ block content
       .stat-card
         .stat-title Всего ветеринаров
         .stat-value#activeVets - #{stats.vets.total}
+      .stat-card
+        .stat-title Всего менеджеров
+        .stat-value#activeManagers - #{stats.managers ? stats.managers.total : 0}
+      .stat-card
+        .stat-title Активные приглашения
+        .stat-value#activeInvites - #{stats.invitations ? stats.invitations.total : 0}
 
     .charts-grid
       .chart-card

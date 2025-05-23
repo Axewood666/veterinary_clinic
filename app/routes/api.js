@@ -6,9 +6,13 @@ const vetsController = require('../controllers/vetsController');
 const petsController = require('../controllers/petsController');
 const appointmentsController = require('../controllers/appointmentsController');
 const adminController = require('../controllers/adminController');
+const authMiddleware = require('../middlewares/authMiddleware');
+
+router.use(authMiddleware.requireAuth);
 
 // Маршруты для ветеринаров
 router.get('/vets', vetsController.getAll);
+router.get('/vets/schedule', vetsController.getSchedule);
 router.get('/vets/:id', vetsController.getOne);
 router.post('/vets', vetsController.create);
 router.put('/vets/:id', vetsController.update);

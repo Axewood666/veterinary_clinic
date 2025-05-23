@@ -1,0 +1,196 @@
+extends ../../layouts/auth.pug
+
+block content
+  .auth-container
+    .card.invite-register
+      .card-header
+        h1.text-center Регистрация сотрудника
+        p.text-center.text-muted Завершите регистрацию, используя приглашение
+      
+      .card-body
+        .alert.alert-info.mb-4
+          i.bi.bi-info-circle-fill.me-2
+          | Вы были приглашены присоединиться к клинике в качестве 
+          b#roleDisplay -
+          |. Создайте учетную запись, чтобы получить доступ к системе.
+        
+        form#inviteRegisterForm(method="post")
+          input(type="hidden" name="token" id="tokenInput")
+          input(type="hidden" name="role" id="roleInput")
+          input(type="hidden" name="email" id="emailInput")
+          
+          .mb-3
+            label.form-label(for="username") Имя пользователя
+            input.form-control#username(type="text" name="username" required minlength="3" maxlength="50")
+          
+          .mb-3
+            label.form-label(for="name") Полное имя
+            input.form-control#name(type="text" name="name" required)
+          
+          .mb-3
+            label.form-label(for="password") Пароль
+            input.form-control#password(type="password" name="password" required minlength="6")
+            .form-text Минимум 6 символов
+          
+          .mb-3
+            label.form-label(for="confirmPassword") Подтверждение пароля
+            input.form-control#confirmPassword(type="password" name="confirmPassword" required)
+          
+          .mb-3
+            label.form-label(for="phoneNumber") Номер телефона (опционально)
+            input.form-control#phoneNumber(type="tel" name="phoneNumber")
+          
+          .mb-3.form-check
+            input.form-check-input#termsCheck(type="checkbox" required)
+            label.form-check-label(for="termsCheck") Я согласен с условиями использования и политикой конфиденциальности
+          
+          .d-grid
+            button.btn.btn-primary.btn-block(type="submit") Создать аккаунт
+      
+      .card-footer.text-center
+        p Уже есть аккаунт? 
+          a(href="/auth/login") Войти
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Получаем токен из URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (!token) {
+        document.querySelector('.card-body').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Недействительное приглашение. Пожалуйста, убедитесь, что вы используете правильную ссылку.
+          </div>
+          <div class="text-center mt-3">
+            <a href="/auth/login" class="btn btn-outline-primary">Вернуться на страницу входа</a>
+          </div>
+        `;
+        return;
+      }
+      
+      document.getElementById('tokenInput').value = token;
+      
+      // Получаем информацию о приглашении
+      fetchInviteInfo(token);
+      
+      // Обработка отправки формы
+      document.getElementById('inviteRegisterForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Валидация формы
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+          alert('Пароли не совпадают');
+          return;
+        }
+        
+        // Сбор данных формы
+        const formData = {
+          token: document.getElementById('tokenInput').value,
+          username: document.getElementById('username').value,
+          name: document.getElementById('name').value,
+          password: document.getElementById('password').value,
+          email: document.getElementById('emailInput').value,
+          phoneNumber: document.getElementById('phoneNumber').value || null
+        };
+        
+        try {
+          const response = await fetch('/auth/invite/' + token, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Сохраняем токен в localStorage
+            localStorage.setItem('token', data.token);
+            
+            // Показываем сообщение об успехе
+            alert('Регистрация успешно завершена! Сейчас вы будете перенаправлены в систему.');
+            
+            // Перенаправляем на страницу в зависимости от роли
+            switch (document.getElementById('roleInput').value) {
+              case 'Vet':
+                window.location.href = '/employee/clients';
+                break;
+              case 'Manager':
+                window.location.href = '/employee/clients';
+                break;
+              case 'Admin':
+                window.location.href = '/admin/dashboard';
+                break;
+              default:
+                window.location.href = '/';
+            }
+          } else {
+            alert(data.message || 'Ошибка при регистрации');
+          }
+        } catch (error) {
+          console.error('Ошибка при отправке формы:', error);
+          alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
+        }
+      });
+      
+      // Получение информации о приглашении
+      async function fetchInviteInfo(token) {
+        try {
+          const response = await fetch(`/auth/invites/info?token=${token}`);
+          
+          if (!response.ok) {
+            document.querySelector('.card-body').innerHTML = `
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Приглашение недействительно или срок его действия истек.
+              </div>
+              <div class="text-center mt-3">
+                <a href="/auth/login" class="btn btn-outline-primary">Вернуться на страницу входа</a>
+              </div>
+            `;
+            return;
+          }
+          
+          const data = await response.json();
+          
+          // Устанавливаем данные из приглашения
+          document.getElementById('emailInput').value = data.email;
+          document.getElementById('roleInput').value = data.role;
+          
+          // Отображаем роль на русском
+          let roleText;
+          switch (data.role) {
+            case 'Vet':
+              roleText = 'ветеринара';
+              break;
+            case 'Manager':
+              roleText = 'менеджера';
+              break;
+            case 'Admin':
+              roleText = 'администратора';
+              break;
+            default:
+              roleText = 'сотрудника';
+          }
+          document.getElementById('roleDisplay').textContent = roleText;
+          
+        } catch (error) {
+          console.error('Ошибка при получении информации о приглашении:', error);
+          document.querySelector('.card-body').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Не удалось загрузить информацию о приглашении. Пожалуйста, попробуйте позже.
+            </div>
+            <div class="text-center mt-3">
+              <a href="/auth/login" class="btn btn-outline-primary">Вернуться на страницу входа</a>
+            </div>
+          `;
+        }
+      }
+    });

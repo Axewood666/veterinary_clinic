@@ -40,6 +40,7 @@ app.use('/api', require('./routes/api'));
 app.use('/admin', require('./routes/admin'));
 app.use('/auth', require('./routes/auth'));
 app.use('/employee', require('./routes/employee'));
+app.use('/client', require('./routes/client')); // Клиентский интерфейс
 
 // Обработка ошибок
 app.use((err, req, res, next) => {

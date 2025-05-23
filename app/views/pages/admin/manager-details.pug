@@ -1,0 +1,106 @@
+extends ../../layouts/admin.pug
+
+block content
+  .manager-details-page
+    .page-header.mb-4
+      .d-flex.align-items-center
+        a.btn.btn-sm.btn-outline-secondary.me-3(href="/admin/managers")
+          i.bi.bi-arrow-left
+          |  Назад к списку
+        h1 Информация о менеджере
+    
+    .row
+      .col-md-4
+        .card.mb-4
+          .card-body
+            .text-center.mb-4
+              if manager.avatar
+                img.img-profile.rounded-circle.img-thumbnail(src=manager.avatar, alt=manager.name, style="width: 150px; height: 150px; object-fit: cover;")
+              else
+                .avatar-placeholder.bg-light.rounded-circle.d-flex.align-items-center.justify-content-center.mx-auto(style="width: 150px; height: 150px;")
+                  i.bi.bi-person.text-secondary(style="font-size: 4rem;")
+              h3.mt-3= manager.name
+              p.text-muted= manager.username
+            
+            .manager-info
+              .detail-item.d-flex.mb-2
+                .detail-label.text-muted.me-2 ID:
+                .detail-value= manager.userid
+              .detail-item.d-flex.mb-2
+                .detail-label.text-muted.me-2 Email:
+                .detail-value= manager.email
+              .detail-item.d-flex.mb-2
+                .detail-label.text-muted.me-2 Телефон:
+                .detail-value= manager.phoneNumber || 'Не указан'
+              .detail-item.d-flex.mb-2
+                .detail-label.text-muted.me-2 Статус:
+                .detail-value
+                  span.badge.bg-success Активен
+            
+            .mt-4
+              button.btn.btn-danger.ban-manager-btn(data-userid=manager.userid)
+                i.bi.bi-slash-circle.me-2
+                | Заблокировать аккаунт
+      
+      .col-md-8
+        .card.mb-4
+          .card-header
+            h2.h5.mb-0 Статистика работы
+          .card-body
+            .row
+              .col-md-6.col-lg-4
+                .stat-card.mb-3
+                  h3.stat-title Обработано приемов
+                  .stat-value= stats.appointmentsModified
+              // Здесь можно добавить другие показатели
+        
+        .card
+          .card-header
+            h2.h5.mb-0 Последние действия
+          .card-body
+            //- Пока нет данных о действиях
+            if false
+              .activity-list
+                each activity in activities
+                  .activity-item.mb-3
+                    .d-flex.align-items-center
+                      .activity-icon.me-3
+                        i.bi.bi-check-circle
+                      .activity-details
+                        p.mb-0= activity.description
+                        small.text-muted= activity.date
+            else
+              .alert.alert-info История действий пока недоступна
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Блокировка менеджера
+      document.querySelector('.ban-manager-btn')?.addEventListener('click', async function() {
+        if (!confirm('Вы уверены, что хотите заблокировать этого менеджера?')) {
+          return;
+        }
+        
+        const userId = this.getAttribute('data-userid');
+        
+        try {
+          const response = await fetch(`/api/users/${userId}/ban`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            alert('Менеджер успешно заблокирован');
+            window.location.href = '/admin/managers';
+          } else {
+            const data = await response.json();
+            alert(data.message || 'Не удалось заблокировать менеджера');
+          }
+        } catch (error) {
+          console.error('Ошибка при блокировке менеджера:', error);
+          alert('Произошла ошибка при попытке заблокировать менеджера');
+        }
+      });
+    });

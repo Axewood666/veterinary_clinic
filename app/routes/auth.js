@@ -13,8 +13,9 @@ router.get('/register', authController.renderRegister);
 router.post('/register', authController.register);
 
 // Приглашение сотрудника
-router.post('/invite', authController.sendInvite);
+router.get('/register/invite', authController.renderInviteRegister);
 router.post('/invite/:token', authController.registerByInvite);
+router.get('/invites/info', authController.getInviteInfo);
 
 // Восстановление пароля
 router.get('/forgot-password', authController.renderForgotPassword);

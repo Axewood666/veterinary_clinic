@@ -1,0 +1,93 @@
+extends ../../layouts/client.pug
+
+block content
+  h1.page-title Мой профиль
+  
+  if success
+    .alert.alert-success
+      p Ваш профиль успешно обновлен
+  
+  .card
+    .card-header
+      h2 Редактирование профиля
+    .card-body
+      form(action="/client/profile" method="POST")
+        .row
+          .col-md-6
+            .form-group.mb-3
+              label(for="name") Имя
+              input.form-control#name(
+                type="text"
+                name="name"
+                value=user.name
+                required
+              )
+          
+          .col-md-6
+            .form-group.mb-3
+              label(for="email") Email
+              input.form-control#email(
+                type="email"
+                name="email"
+                value=user.email
+                required
+              )
+        
+        .row
+          .col-md-6
+            .form-group.mb-3
+              label(for="phoneNumber") Телефон
+              input.form-control#phoneNumber(
+                type="tel"
+                name="phoneNumber"
+                value=user.phoneNumber
+                required
+              )
+          
+          .col-md-6
+            .form-group.mb-3
+              label Роль
+              input.form-control(
+                type="text"
+                value=user.role === 'Client' ? 'Клиент' : 'Администратор'
+                readonly
+              )
+        
+        .form-group.mb-3
+          p.text-muted Для изменения пароля, пожалуйста, обратитесь к администратору клиники.
+        
+        .form-group.d-flex.justify-content-end.mt-4
+          button.btn.btn-primary(type="submit") Сохранить изменения
+
+block scripts
+  script.
+    // Валидация формы
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      
+      form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        
+        if (!name.trim()) {
+          alert('Пожалуйста, введите ваше имя');
+          isValid = false;
+        }
+        
+        if (!email.trim() || !email.includes('@')) {
+          alert('Пожалуйста, введите корректный email');
+          isValid = false;
+        }
+        
+        if (!phoneNumber.trim() || phoneNumber.length < 7) {
+          alert('Пожалуйста, введите корректный номер телефона');
+          isValid = false;
+        }
+        
+        if (!isValid) {
+          event.preventDefault();
+        }
+      });
+    });

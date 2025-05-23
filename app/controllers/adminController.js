@@ -38,11 +38,21 @@ exports.renderInvite = (req, res) => {
  */
 exports.getDashboardStats = async (req, res) => {
     try {
-        // общее количество клиентов
+        // Общее количество клиентов
         const clientsCount = await db('users').where('role', 'Client').count('userid as count').first();
 
         // Общее количество ветеринаров
         const vetsCount = await db('users').where('role', 'Vet').count('userid as count').first();
+        
+        // Общее количество менеджеров
+        const managersCount = await db('users').where('role', 'Manager').count('userid as count').first();
+        
+        // Количество активных приглашений
+        const invitationsCount = await db('invitation_tokens')
+            .where('used', false)
+            .where('expires_at', '>', db.fn.now())
+            .count('id as count')
+            .first();
 
         // Количество питомцев
         const petsCount = await db('pets').count('petid as count').first();
@@ -95,6 +105,12 @@ exports.getDashboardStats = async (req, res) => {
             },
             vets: {
                 total: vetsCount.count,
+            },
+            managers: {
+                total: managersCount.count,
+            },
+            invitations: {
+                total: invitationsCount.count,
             },
             pets: {
                 total: petsCount.count,
@@ -466,6 +482,88 @@ exports.renderPetDetails = async (req, res) => {
 };
 
 /**
+ * Отображение страницы менеджеров
+ */
+exports.renderManagers = async (req, res) => {
+    try {
+        const managers = await db('users')
+            .select('userid', 'name', 'email', 'phoneNumber', 'role', 'avatar', 'username')
+            .where('role', 'Manager')
+            .orderBy('name', 'asc');
+            
+        // Получаем активные приглашения для менеджеров
+        const invitations = await db('invitation_tokens')
+            .select('*')
+            .where('role', 'Manager')
+            .where('used', false)
+            .where('expires_at', '>', db.fn.now())
+            .orderBy('created_at', 'desc');
+
+        res.render('pages/admin/managers', {
+            title: 'Управление менеджерами',
+            activePage: 'managers',
+            user: req.user,
+            managers,
+            invitations
+        });
+    } catch (err) {
+        logger.error(`Ошибка при получении списка менеджеров: ${err.message}`);
+
+        res.render('pages/admin/managers', {
+            title: 'Управление менеджерами',
+            activePage: 'managers',
+            user: req.user,
+            managers: [],
+            invitations: []
+        });
+    }
+};
+
+/**
+ * Получение детальной информации о менеджере
+ */
+exports.getManagerDetails = async (req, res) => {
+    try {
+        const managerId = req.params.id;
+        const manager = await db('users')
+            .select('userid', 'name', 'email', 'phoneNumber', 'role', 'avatar', 'username')
+            .where('userid', managerId)
+            .where('role', 'Manager')
+            .first();
+
+        if (!manager) {
+            return res.status(404).render('pages/error', {
+                title: 'Ошибка',
+                message: 'Менеджер не найден',
+                user: req.user
+            });
+        }
+
+        // Получаем статистику по работе менеджера
+        const appointmentsModified = 0;
+
+        const stats = {
+            appointmentsModified: appointmentsModified
+        };
+
+        res.render('pages/admin/manager-details', {
+            title: 'Информация о менеджере',
+            activePage: 'managers',
+            user: req.user,
+            manager,
+            stats
+        });
+    } catch (err) {
+        logger.error(`Ошибка при получении данных менеджера: ${err.message}`);
+        res.status(500).render('pages/error', {
+            title: 'Ошибка',
+            message: 'Не удалось загрузить информацию о менеджере',
+            user: req.user
+        });
+    }
+};
+
+/**
  * Отображение страницы настроек
  */
 exports.renderSettings = async (req, res) => {
@@ -535,8 +633,7 @@ exports.updateSettings = async (req, res) => {
                 working_hours,
                 appointment_duration,
                 website,
-                logo_url,
-                updated_at: new Date()
+                logo_url
             });
         } else {
             // Создание настроек
@@ -548,9 +645,7 @@ exports.updateSettings = async (req, res) => {
                 working_hours,
                 appointment_duration,
                 website,
-                logo_url,
-                created_at: new Date(),
-                updated_at: new Date()
+                logo_url
             });
         }
 

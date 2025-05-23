@@ -116,9 +116,7 @@ exports.create = async (req, res) => {
             weight: weight || null,
             description,
             photo,
-            owner_id,
-            created_at: new Date(),
-            updated_at: new Date()
+            owner_id
         }, 'petid');
 
         const newPet = await db('pets')

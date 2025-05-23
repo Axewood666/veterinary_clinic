@@ -66,6 +66,23 @@ exports.requireEmployee = (req, res, next) => {
         });
     }
 
+    next();
+};
 
+exports.isClient = (req, res, next) => {
+    if (!req.user) {
+        // Для API запросов возвращаем JSON с ошибкой
+        if (req.originalUrl.startsWith('/api')) {
+            return res.status(403).json({ error: 'Доступ запрещен' });
+        }
+        
+        // Для обычных страниц показываем страницу с ошибкой
+        return res.status(403).render('pages/error', {
+            title: 'Доступ запрещен',
+            message: 'У вас нет прав для доступа к этой странице',
+            error: { message: 'Только для клиентов' }
+        });
+    }
+    
     next();
 };

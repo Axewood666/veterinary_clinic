@@ -1,6 +1,7 @@
 const db = require('../config/database');
 const logger = require('../utils/logger');
 const bcrypt = require('bcrypt');
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 
 /**
  * Получение всех ветеринаров
@@ -197,7 +198,7 @@ exports.delete = async (req, res) => {
         await db('vet_schedules')
             .where('vetid', id)
             .del();
-
+            
         // Удаление ветеринара
         await db('users')
             .where('userid', id)
@@ -211,6 +212,107 @@ exports.delete = async (req, res) => {
 };
 
 /**
+ * Получение расписания ветеринаров на определенную дату
+ */
+exports.getSchedule = async (req, res) => {
+    try {
+        const { date } = req.query;
+        
+        if (!date) {
+            return res.status(400).json({ error: 'Требуется параметр даты' });
+        }
+        if(date < new Date()) {
+            return res.status(400).json({ error: 'Дата не может быть в прошлом' });
+        }
+
+        const selectedDate = new Date(date);
+        const dayOfWeek = selectedDate.getDay();
+        const dbDay = dayOfWeek === 0 ? '7' : String(dayOfWeek);
+        
+        const vets = await db('users')
+            .join('vet_schedules', 'users.userid', 'vet_schedules.vetid')
+            .select(
+                'users.userid', 
+                'users.name', 
+                'vet_schedules.start_time', 
+                'vet_schedules.end_time'
+            )
+            .where('users.role', 'Vet')
+            .where('vet_schedules.day', dbDay);
+        
+        const existingAppointments = await db('appointments')
+            .select('vetid', 'time')
+            .where('date', date)
+            .whereNot('status', 'cancelled');
+        
+        const bookedSlots = {};
+        existingAppointments.forEach(appointment => {
+            if (!bookedSlots[appointment.vetid]) {
+                bookedSlots[appointment.vetid] = [];
+            }
+            bookedSlots[appointment.vetid].push(appointment.time);
+        });
+        
+        const result = [];
+        const groupedVets = {};
+        
+        vets.forEach((vet, i) => {
+            if (!groupedVets[vet.userid]) {
+                groupedVets[vet.userid] = {
+                    userid: vet.userid,
+                    name: vet.name,
+                    specialization: vet.specialization || 'Общая практика',
+                    availableSlots: []
+                };
+            }
+            
+            const startTime = vet.start_time.split(':');
+            const endTime = vet.end_time.split(':');
+            
+            const now = new Date();
+            let startHour = parseInt(startTime[0]);
+            if(now.getDate() === selectedDate.getDate() && i === 0 && startHour < now.getHours()) {
+                startHour = now.getHours() + 1;
+            }
+            let startMinute = parseInt(startTime[1]);
+            if(now.getDate() === selectedDate.getDate() && i === 0 && startMinute < now.getMinutes()){
+                startMinute = now.getMinutes() + 30;
+            }
+            
+            const endHour = parseInt(endTime[0]);
+            const endMinute = parseInt(endTime[1]);
+            
+            while (startHour < endHour || (startHour === endHour && startMinute < endMinute)) {
+                const timeSlot = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
+                
+                if (!bookedSlots[vet.userid] || !bookedSlots[vet.userid].includes(timeSlot)) {
+                    if (!groupedVets[vet.userid].availableSlots.includes(timeSlot)) {
+                        groupedVets[vet.userid].availableSlots.push(timeSlot);
+                    }
+                }
+                startMinute += 30;
+                if (startMinute >= 60) {
+                    startHour += 1;
+                    startMinute = 0;
+                }
+            }
+        });
+        
+        for (const key in groupedVets) {
+            if (groupedVets[key].availableSlots.length > 0) {
+                groupedVets[key].availableSlots.sort();
+                result.push(groupedVets[key]);
+            }
+        }
+        
+        res.json(result);
+    } catch (err) {
+        logger.error(`Ошибка при получении расписания ветеринаров: ${err.message}`);
+        res.status(500).json({ error: 'Ошибка при получении расписания ветеринаров' });
+    }
+};
+
+/**
  * Управление расписанием ветеринара
  */
 exports.updateSchedule = async (req, res) => {
@@ -218,7 +320,6 @@ exports.updateSchedule = async (req, res) => {
         const { id } = req.params;
         const { schedules } = req.body;
 
-        // Проверка существования
         const vet = await db('users')
             .where('userid', id)
             .where('role', 'Vet')
@@ -228,12 +329,10 @@ exports.updateSchedule = async (req, res) => {
             return res.status(404).json({ error: 'Ветеринар не найден' });
         }
 
-        // Удаляем текущее расписание
         await db('vet_schedules')
             .where('vetid', id)
             .del();
 
-        // Добавляем новое расписание
         if (schedules && schedules.length) {
             const schedulesToInsert = schedules.map(schedule => ({
                 vetid: id,
@@ -246,7 +345,6 @@ exports.updateSchedule = async (req, res) => {
             await db('vet_schedules').insert(schedulesToInsert);
         }
 
-        // Получаем обновленное расписание
         const updatedSchedules = await db('vet_schedules')
             .where('vetid', id);
 

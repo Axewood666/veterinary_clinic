@@ -1,18 +1,18 @@
 extends ../../layouts/admin.pug
 
 block content
-  .vets-page
+  .managers-page
     .page-header.d-flex.justify-content-between.align-items-center.mb-4
-      h1 Управление ветеринарами
+      h1 Управление менеджерами
       button.btn.btn-primary(data-bs-toggle="modal" data-bs-target="#inviteModal")
         i.bi.bi-person-plus.me-2
-        | Пригласить ветеринара
+        | Пригласить менеджера
 
     .card.mb-4
       .card-header
-        h2.h5.mb-0 Список ветеринаров
+        h2.h5.mb-0 Список менеджеров
       .card-body
-        if vets && vets.length > 0
+        if managers && managers.length > 0
           .table-responsive
             table.table.table-striped.table-hover
               thead
@@ -21,28 +21,26 @@ block content
                   th Имя
                   th Email
                   th Телефон
-                  th Специализация
                   th Действия
               tbody
-                each vet in vets
+                each manager in managers
                   tr
-                    td= vet.userid
+                    td= manager.userid
                     td
-                      if vet.avatar
-                        img.avatar.me-2(src=vet.avatar, alt=vet.name, width="30" height="30" style="border-radius: 50%; object-fit: cover;")
-                      = vet.name || vet.username
-                    td= vet.email
-                    td= vet.phoneNumber || 'Не указан'
-                    td= vet.specialization || 'Общая практика'
+                      if manager.avatar
+                        img.avatar.me-2(src=manager.avatar, alt=manager.name, width="30" height="30" style="border-radius: 50%; object-fit: cover;")
+                      = manager.name || manager.username
+                    td= manager.email
+                    td= manager.phoneNumber || 'Не указан'
                     td
-                      a.btn.btn-sm.btn-outline-primary.me-2(href=`/admin/vets/${vet.userid}`)
+                      a.btn.btn-sm.btn-outline-primary.me-2(href=`/admin/managers/${manager.userid}`)
                         i.bi.bi-eye.me-1
                         | Детали
-                      button.btn.btn-sm.btn-outline-danger.ban-btn(data-userid=vet.userid data-username=vet.name || vet.username)
+                      button.btn.btn-sm.btn-outline-danger.ban-btn(data-userid=manager.userid data-username=manager.name || manager.username)
                         i.bi.bi-slash-circle.me-1
                         | Блокировать
         else
-          .alert.alert-info Ветеринары не найдены
+          .alert.alert-info Менеджеры не найдены
 
     if invitations && invitations.length > 0
       .card
@@ -58,7 +56,7 @@ block content
                   th Срок действия
                   th Действия
               tbody
-                each invite in invitations.filter(i => i.role === 'Vet')
+                each invite in invitations.filter(i => i.role === 'Manager')
                   - const expiresDate = new Date(invite.expires_at)
                   - const isExpiringSoon = (expiresDate - new Date()) < 86400000 // 24 часа
                   tr(class=isExpiringSoon ? 'table-warning' : '')
@@ -73,12 +71,12 @@ block content
                         i.bi.bi-x-circle.me-1
                         | Отозвать
 
-  // Модальное окно для приглашения ветеринара
+  // Модальное окно для приглашения менеджера
   #inviteModal.modal.fade(tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true")
     .modal-dialog
       .modal-content
         .modal-header
-          h5#inviteModalLabel.modal-title Пригласить ветеринара
+          h5#inviteModalLabel.modal-title Пригласить менеджера
           button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
         .modal-body
           form#inviteForm
@@ -86,7 +84,7 @@ block content
               label.form-label(for="inviteEmail") Email
               input#inviteEmail.form-control(type="email" name="email" required)
               .form-text Приглашение будет отправлено на указанный email
-            input(type="hidden" name="role" value="Vet")
+            input(type="hidden" name="role" value="Manager")
         .modal-footer
           button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Отмена
           button#sendInviteBtn.btn.btn-primary(type="button") Отправить приглашение
@@ -94,7 +92,7 @@ block content
 block scripts
   script.
     document.addEventListener('DOMContentLoaded', function() {
-      // Отправка приглашения ветеринару
+      // Отправка приглашения менеджеру
       const sendInviteBtn = document.getElementById('sendInviteBtn');
       if (sendInviteBtn) {
         sendInviteBtn.addEventListener('click', async function() {
@@ -112,7 +110,7 @@ block scripts
               },
               body: JSON.stringify({
                 email,
-                role: 'Vet'
+                role: 'Manager'
               })
             });
 
@@ -177,13 +175,13 @@ block scripts
         });
       });
 
-      // Блокировка ветеринара
+      // Блокировка менеджера
       document.querySelectorAll('.ban-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
           const userId = this.getAttribute('data-userid');
           const username = this.getAttribute('data-username');
           
-          if (!confirm(`Вы уверены, что хотите заблокировать ветеринара ${username}?`)) {
+          if (!confirm(`Вы уверены, что хотите заблокировать менеджера ${username}?`)) {
             return;
           }
 
@@ -199,16 +197,29 @@ block scripts
             });
 
             if (response.ok) {
-              showToast('Успешно', 'Ветеринар заблокирован', 'success');
+              showToast('Успешно', 'Менеджер заблокирован', 'success');
               setTimeout(() => window.location.reload(), 1500);
             } else {
               const data = await response.json();
-              showToast('Ошибка', data.message || 'Не удалось заблокировать ветеринара', 'error');
+              showToast('Ошибка', data.message || 'Не удалось заблокировать менеджера', 'error');
             }
           } catch (error) {
-            console.error('Ошибка при блокировке ветеринара:', error);
-            showToast('Ошибка', 'Не удалось заблокировать ветеринара', 'error');
+            console.error('Ошибка при блокировке менеджера:', error);
+            showToast('Ошибка', 'Не удалось заблокировать менеджера', 'error');
           }
         });
       });
+
+      // Вспомогательная функция для отображения уведомлений
+      function showToast(title, message, type = 'info') {
+        if (typeof Toastify === 'function') {
+          Toastify({
+            text: message,
+            className: `toast-${type}`,
+            duration: 3000
+          }).showToast();
+        } else {
+          alert(`${title}: ${message}`);
+        }
+      }
     });

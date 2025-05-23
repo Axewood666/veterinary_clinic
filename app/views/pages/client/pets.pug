@@ -1,0 +1,105 @@
+extends ../../layouts/client.pug
+
+block content
+  .d-flex.justify-content-between.align-items-center.mb-4
+    h1.page-title Мои питомцы
+    a.btn.btn-success(href="/client/pets/add")
+      i.bi.bi-plus-circle.me-2
+      | Добавить питомца
+  
+  if success
+    .alert.alert-success.mb-4
+      case success
+        when 'added'
+          p Питомец успешно добавлен
+        when 'updated'
+          p Информация о питомце обновлена
+        when 'deleted'
+          p Питомец успешно удален
+        default
+          p Операция выполнена успешно
+  
+  if pets && pets.length > 0
+    .row
+      each pet in pets
+        .col-md-6.col-lg-4.mb-4
+          .card.pet-card
+            .card-body
+              h3.pet-name= pet.name
+              .pet-info.my-3
+                .pet-info-item
+                  span.label Вид:
+                  span.value
+                    if pet.type === 'dog'
+                      | Собака
+                    else if pet.type === 'cat'
+                      | Кошка
+                    else if pet.type === 'bird'
+                      | Птица
+                    else if pet.type === 'fish'
+                      | Рыба
+                    else
+                      | Другое
+                .pet-info-item
+                  span.label Порода:
+                  span.value= pet.breed
+                .pet-info-item
+                  span.label Возраст:
+                  span.value= pet.age + ' ' + (pet.age === 1 ? 'год' : pet.age > 1 && pet.age < 5 ? 'года' : 'лет')
+                .pet-info-item
+                  span.label Пол:
+                  span.value= pet.gender === 'male' ? 'Самец' : 'Самка'
+              .pet-actions
+                a.btn.btn-info.btn-sm.me-1(href=`/client/pets/${pet.petid}`)
+                  i.bi.bi-eye.me-1
+                  | Детали
+                a.btn.btn-primary.btn-sm.me-1(href=`/client/pets/${pet.petid}/edit`)
+                  i.bi.bi-pencil.me-1
+                  | Изменить
+                a.btn.btn-success.btn-sm.me-1(href=`/appointment?petid=${pet.petid}`)
+                  i.bi.bi-calendar-plus.me-1
+                  | Записать
+                a.btn.btn-warning.btn-sm(href=`/client/pets/${pet.petid}/history`)
+                  i.bi.bi-clock-history.me-1
+                  | История
+  else
+    .alert.alert-info
+      p У вас пока нет добавленных питомцев.
+      a.btn.btn-primary.mt-2(href="/client/pets/add") Добавить питомца
+
+block styles
+  style.
+    .pet-card {
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+    }
+    
+    .pet-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .pet-name {
+      color: #4a4a4a;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .pet-info-item {
+      display: flex;
+      margin-bottom: 8px;
+    }
+    
+    .pet-info-item .label {
+      font-weight: bold;
+      min-width: 70px;
+    }
+    
+    .pet-actions {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }

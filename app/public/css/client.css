@@ -1,0 +1,267 @@
+/* Стили для клиентского интерфейса */
+
+/* Основная структура */
+.client-container {
+  display: flex;
+  min-height: calc(100vh - 120px); /* Учитываем высоту навбара и футера */
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 1.5rem;
+}
+
+/* Стили для сайдбара */
+.sidebar-header {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sidebar-header h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.sidebar-menu {
+  margin-bottom: 2rem;
+}
+
+.sidebar-menu .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0.5rem;
+  color: #495057;
+  transition: all 0.3s;
+}
+
+.sidebar-menu .nav-link:hover {
+  background-color: #e9ecef;
+  color: #007bff;
+}
+
+.sidebar-menu .nav-link i {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.sidebar-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Стили для карточек */
+.stats-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  transition: all 0.3s;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card h3 {
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+.stats-card .stats-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #007bff;
+  margin: 0.5rem 0 1rem;
+}
+
+.pet-card, .appointment-card {
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.pet-card:hover, .appointment-card:hover {
+  background-color: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.pet-info, .appointment-info {
+  margin-bottom: 1rem;
+}
+
+.pet-actions, .appointment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Таблицы */
+.table th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Формы */
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Хлебные крошки */
+.breadcrumb {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+}
+
+/* Стили для страницы с деталями */
+.detail-item {
+  display: flex;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-label {
+  font-weight: bold;
+  min-width: 120px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .client-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+  }
+
+  .sidebar-menu .nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .sidebar-menu .nav-item {
+    flex-shrink: 0;
+  }
+
+  .sidebar-menu .nav-link {
+    padding: 0.5rem 1rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* Анимации и эффекты */
+.btn {
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.page-title {
+  margin-bottom: 1.5rem;
+  color: #343a40;
+  position: relative;
+}
+
+.page-title:after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 3px;
+  background-color: #007bff;
+  margin-top: 0.5rem;
+}
+
+/* Дополнительные стили для состояний */
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.badge.bg-primary {
+  background-color: #007bff !important;
+}
+
+/* Для шаблона истории приемов */
+.timeline {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 120px;
+  height: 100%;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.timeline-item {
+  display: flex;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-date {
+  width: 120px;
+  text-align: right;
+  padding-right: 20px;
+  flex-shrink: 0;
+}
+
+.timeline-content {
+  background: #f8f9fa;
+  border-radius: 5px;
+  padding: 1rem;
+  flex-grow: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-left: 20px;
+}
