@@ -1,0 +1,591 @@
+extends ../../layouts/admin.pug
+
+block content
+  .appointments-page
+    .card.mb-4
+      .card-header
+        h2 Управление приемами
+        button.btn.btn-primary#addAppointmentBtn(
+          type="button"
+          style="background-color:rgb(135, 187, 247); border-color:rgb(0, 0, 0); padding: 8px 16px; border-radius: 5px; font-weight: bold; float: right;"
+        ) Добавить прием
+
+      .card-body
+        .filters.mb-4
+          .row.g-3
+            .col-md-3
+              label.form-label(for="dateFilter") Дата:
+              input.form-control#dateFilter(type="date" value=filters && filters.date ? filters.date : '')
+            .col-md-3
+              label.form-label(for="vetFilter") Ветеринар:
+              select.form-select#vetFilter
+                option(value="") Все ветеринары
+                each vet in vets
+                  option(value=vet.userid selected=filters && filters.vetId == vet.userid)= vet.name
+            .col-md-3
+              label.form-label(for="statusFilter") Статус:
+              select.form-select#statusFilter
+                option(value="") Все статусы
+                option(value="scheduled" selected=filters && filters.status === 'scheduled') Запланирован
+                option(value="accepted" selected=filters && filters.status === 'accepted') Подтвержден
+                option(value="completed" selected=filters && filters.status === 'completed') Завершен
+                option(value="cancelled" selected=filters && filters.status === 'cancelled') Отменен
+            .col-md-3.d-flex.align-items-end
+              button.btn.btn-secondary#applyFilters(style="background-color: #6c757d; border-color: #6c757d;") Применить
+
+        if appointments && appointments.length > 0
+          .table-responsive
+            table.table.table-striped.table-hover
+              thead
+                tr
+                  th ID
+                  th Дата
+                  th Время
+                  th Ветеринар
+                  th Питомец
+                  th Тип приема
+                  th Статус
+                  th Действия
+              tbody
+                each appointment in appointments
+                  tr(data-appointmentid=appointment.appointmentid)
+                    td= appointment.appointmentid
+                    td= new Date(appointment.date).toLocaleDateString()
+                    td= appointment.time
+                    td= appointment.vetName
+                    td= appointment.petName
+                    td= appointment.type
+                    td
+                      span.badge(class=appointment.status === 'completed' ? 'bg-success' : appointment.status === 'accepted' ? 'bg-primary' : appointment.status === 'cancelled' ? 'bg-danger' : 'bg-warning')= appointment.status
+                    td
+                      button.btn.btn-sm.btn-outline-primary.me-1.view-btn(data-appointmentid=appointment.appointmentid)
+                        i.bi.bi-eye.me-1
+                        | Просмотр
+                      button.btn.btn-sm.btn-outline-secondary.me-1.edit-btn(data-appointmentid=appointment.appointmentid)
+                        i.bi.bi-pencil.me-1
+                        | Редактировать
+                      if appointment.status === 'scheduled'
+                        button.btn.btn-sm.btn-outline-success.me-1.accept-btn(data-appointmentid=appointment.appointmentid)
+                          i.bi.bi-check-circle.me-1
+                          | Подтвердить
+                        button.btn.btn-sm.btn-outline-danger.cancel-btn(data-appointmentid=appointment.appointmentid)
+                          i.bi.bi-x-circle.me-1
+                          | Отменить
+                      if appointment.status === 'accepted'
+                        button.btn.btn-sm.btn-outline-danger.me-1.cancel-btn(data-appointmentid=appointment.appointmentid)
+                          i.bi.bi-x-circle.me-1
+                          | Отменить
+                        button.btn.btn-sm.btn-outline-info.complete-btn(data-appointmentid=appointment.appointmentid)
+                          i.bi.bi-check2-circle.me-1
+                          | Завершить
+        else
+          .alert.alert-info Приемы не найдены
+
+    .card#appointmentDetails.mt-4(style="display: none;")
+      .card-header
+        h5.mb-0 Детали приема
+        button.btn-close.close-btn(type="button" aria-label="Close")
+      .card-body
+        .row
+          .col-md-6
+            .detail-item.mb-2
+              strong ID: 
+              span#detailId -
+            .detail-item.mb-2
+              strong Дата: 
+              span#detailDate -
+            .detail-item.mb-2
+              strong Время: 
+              span#detailTime -
+            .detail-item.mb-2
+              strong Ветеринар: 
+              span#detailVet -
+            .detail-item.mb-2
+              strong Питомец: 
+              span#detailPet -
+          .col-md-6
+            .detail-item.mb-2
+              strong Тип: 
+              span#detailType -
+            .detail-item.mb-2
+              strong Статус: 
+              span#detailStatus -
+            .detail-item.mb-2
+              strong Комментарий: 
+              span#detailComment -
+            .detail-item.mb-2
+              strong Диагноз: 
+              span#detailDiagnosis -
+            .detail-item.mb-2
+              strong Рекомендации: 
+              span#detailRecomendations -
+  #appointmentModal.modal.fade(tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true")
+    .modal-dialog.modal-dialog-centered.modal-lg
+      .modal-content
+        .modal-header(style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6")
+          h5#appointmentModalLabel.modal-title(style="color: #333") Добавить прием
+          button.btn-close(type="button" aria-label="Close")
+        .modal-body
+          form#appointmentForm
+            input(type="hidden" id="appointmentId" name="appointmentid")
+            .row
+              .col-md-6
+                .mb-3
+                  label.form-label(for="petid" style="font-weight: 500") Питомец *
+                  select.form-select#petid(name="petid" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                    option(value="") Выберите питомца
+                .mb-3
+                  label.form-label(for="vetid" style="font-weight: 500") Ветеринар *
+                  select.form-select#vetid(name="vetid" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                    option(value="") Выберите ветеринара
+                    each vet in vets
+                      option(value=vet.userid)= vet.name
+                .mb-3
+                  label.form-label(for="date" style="font-weight: 500") Дата *
+                  input.form-control#date(type="date" name="date" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                .mb-3
+                  label.form-label(for="time" style="font-weight: 500") Время *
+                  select.form-select#time(name="time" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                    option(value="") Выберите время
+                    - let hours = ['09', '10', '11', '12', '13', '14', '15', '16', '17']
+                    - let minutes = ['00', '30']
+                    each hour in hours
+                      each minute in minutes
+                        option(value=`${hour}:${minute}`)= `${hour}:${minute}`
+              .col-md-6
+                .mb-3
+                  label.form-label(for="type" style="font-weight: 500") Тип *
+                  select.form-select#type(name="type" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                    option(value="consultation") Консультация
+                    option(value="vaccination") Вакцинация
+                    option(value="other") Другое
+                .mb-3
+                  label.form-label(for="status" style="font-weight: 500") Статус *
+                  select.form-select#status(name="status" required style="border: 1px solid #ced4da; border-radius: 4px;")
+                    option(value="scheduled") Запланирован
+                    option(value="accepted") Подтвержден
+                    option(value="completed") Завершен
+                    option(value="cancelled") Отменен
+                .mb-3
+                  label.form-label(for="comment" style="font-weight: 500") Комментарий
+                  textarea.form-control#comment(name="comment" rows="3" style="border: 1px solid #ced4da; border-radius: 4px;")
+            .row
+              .col-12
+                .mb-3.diagnosis-group(style="display: none;")
+                  label.form-label(for="diagnosis" style="font-weight: 500") Диагноз
+                  textarea.form-control#diagnosis(name="diagnosis" rows="3" placeholder="Укажите диагноз при завершении приема" style="border: 1px solid #ced4da; border-radius: 4px;")
+                  small.form-text.text-muted.required-note (обязательно для завершенных приемов)
+                .mb-3.recomendations-group(style="display: none;")
+                  label.form-label(for="recomendations" style="font-weight: 500") Рекомендации
+                  textarea.form-control#recomendations(name="recomendations" rows="3" placeholder="Укажите рекомендации для пациента (необязательно)" style="border: 1px solid #ced4da; border-radius: 4px;")
+        .modal-footer(style="border-top: 1px solid #dee2e6")
+          button.btn.btn-secondary#cancelModalBtn(
+            type="button" 
+            style="background-color: #6c757d; border-color: #6c757d; padding: 8px 16px;"
+          ) Отмена
+          button.btn.btn-primary#saveAppointmentBtn(
+            type="submit"
+            style="background-color:rgb(135, 187, 247); border-color:rgb(0, 0, 0); padding: 8px 16px;"
+          ) Сохранить
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const dateFilter = document.getElementById('dateFilter');
+      const vetFilter = document.getElementById('vetFilter');
+      const statusFilter = document.getElementById('statusFilter');
+      const applyFiltersBtn = document.getElementById('applyFilters');
+      const appointmentDetails = document.getElementById('appointmentDetails');
+      const closeBtn = document.querySelector('.close-btn');
+      const addAppointmentBtn = document.getElementById('addAppointmentBtn');
+      
+      const modal = document.getElementById('appointmentModal');
+      const appointmentForm = document.getElementById('appointmentForm');
+      const statusSelect = document.getElementById('status');
+      const diagnosisGroup = document.querySelector('.diagnosis-group');
+      const recomendationsGroup = document.querySelector('.recomendations-group');
+      const saveBtn = document.getElementById('saveAppointmentBtn');
+      const cancelBtn = document.getElementById('cancelModalBtn');
+      const modalCloseBtn = modal.querySelector('.btn-close');
+      
+      if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyFilters);
+      }
+      
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          appointmentDetails.style.display = 'none';
+        });
+      }
+      
+      if (addAppointmentBtn) {
+        addAppointmentBtn.addEventListener('click', function() {
+          showAppointmentModal('add');
+        });
+      }
+      
+      if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+          toggleDiagnosisFields(this.value);
+        });
+      }
+      
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+          closeModal();
+        });
+      }
+      
+      if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', function() {
+          closeModal();
+        });
+      }
+      
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-btn') || e.target.closest('.view-btn')) {
+          const btn = e.target.closest('.view-btn') || e.target;
+          const appointmentId = btn.getAttribute('data-appointmentid');
+          fetchAppointmentDetails(appointmentId);
+        } else if (e.target.classList.contains('edit-btn') || e.target.closest('.edit-btn')) {
+          const btn = e.target.closest('.edit-btn') || e.target;
+          const appointmentId = btn.getAttribute('data-appointmentid');
+          showAppointmentModal('edit', appointmentId);
+        } else if (e.target.classList.contains('accept-btn') || e.target.closest('.accept-btn')) {
+          const btn = e.target.closest('.accept-btn') || e.target;
+          const appointmentId = btn.getAttribute('data-appointmentid');
+          acceptAppointment(appointmentId);
+        } else if (e.target.classList.contains('complete-btn') || e.target.closest('.complete-btn')) {
+          const btn = e.target.closest('.complete-btn') || e.target;
+          const appointmentId = btn.getAttribute('data-appointmentid');
+          completeAppointment(appointmentId);
+        } else if (e.target.classList.contains('cancel-btn') || e.target.closest('.cancel-btn')) {
+          const btn = e.target.closest('.cancel-btn') || e.target;
+          const appointmentId = btn.getAttribute('data-appointmentid');
+          cancelAppointment(appointmentId);
+        }
+      });
+      
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          saveAppointment();
+        });
+      }
+      
+      function applyFilters() {
+        const date = dateFilter ? dateFilter.value : '';
+        const vetId = vetFilter ? vetFilter.value : '';
+        const status = statusFilter ? statusFilter.value : '';
+        
+        window.location.href = `/employee/appointments?date=${date}&vetId=${vetId}&status=${status}`;
+      }
+      
+      async function fetchAppointmentDetails(appointmentId) {
+        try {
+          const response = await fetch(`/api/appointments/${appointmentId}`);
+          if (!response.ok) throw new Error('Не удалось получить данные о приеме');
+          
+          const appointment = await response.json();
+          displayAppointmentDetails(appointment);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Произошла ошибка при загрузке данных приема');
+        }
+      }
+      
+      function displayAppointmentDetails(appointment) {
+        document.getElementById('detailId').textContent = appointment.appointmentid || '';
+        document.getElementById('detailDate').textContent = appointment.date ? new Date(appointment.date).toLocaleDateString() : '';
+        document.getElementById('detailTime').textContent = appointment.time || '';
+        document.getElementById('detailVet').textContent = appointment.vet_name || '';
+        document.getElementById('detailPet').textContent = appointment.pet_name || '';
+        document.getElementById('detailType').textContent = appointment.type || '';
+        document.getElementById('detailStatus').textContent = appointment.status || '';
+        document.getElementById('detailComment').textContent = appointment.comment || 'Н/Д';
+        document.getElementById('detailDiagnosis').textContent = appointment.diagnosis || 'Н/Д';
+        document.getElementById('detailRecomendations').textContent = appointment.recomendations || 'Н/Д';
+        
+        appointmentDetails.style.display = 'block';
+      }
+      
+      async function showAppointmentModal(mode, appointmentId = null) {
+        resetModalForm();
+        
+        document.getElementById('appointmentModalLabel').textContent = mode === 'add' ? 'Добавить прием' : 'Редактировать прием';
+        
+        await loadPets();
+        
+        if (mode === 'edit' && appointmentId) {
+          await loadAppointmentData(appointmentId);
+        } else {
+          toggleDiagnosisFields('scheduled');
+        }
+        
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+      }
+      
+      async function loadPets() {
+        try {
+          const response = await fetch('/api/pets');
+          if (!response.ok) throw new Error('Не удалось загрузить список питомцев');
+          
+          const pets = await response.json();
+          const petSelect = document.getElementById('petid');
+          
+          while (petSelect.options.length > 1) {
+            petSelect.remove(1);
+          }
+          
+          pets.forEach(pet => {
+            const option = document.createElement('option');
+            option.value = pet.petid;
+            option.textContent = `${pet.name} (${pet.ownerName})`;
+            petSelect.appendChild(option);
+          });
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Не удалось загрузить список питомцев');
+        }
+      }
+      
+      async function loadAppointmentData(appointmentId) {
+        try {
+          const response = await fetch(`/api/appointments/${appointmentId}`);
+          if (!response.ok) throw new Error('Не удалось загрузить данные приема');
+          
+          const appointment = await response.json();
+          
+          document.getElementById('appointmentId').value = appointment.appointmentid;
+          document.getElementById('petid').value = appointment.petid;
+          document.getElementById('vetid').value = appointment.vetid;
+          
+          if (appointment.date) {
+            const date = new Date(appointment.date);
+            const formattedDate = date.toISOString().split('T')[0];
+            document.getElementById('date').value = formattedDate;
+          }
+          
+          document.getElementById('time').value = appointment.time;
+          document.getElementById('type').value = appointment.type;
+          document.getElementById('comment').value = appointment.comment || '';
+          document.getElementById('status').value = appointment.status;
+          document.getElementById('diagnosis').value = appointment.diagnosis || '';
+          document.getElementById('recomendations').value = appointment.recomendations || '';
+          
+          toggleDiagnosisFields(appointment.status);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Не удалось загрузить данные приема');
+          const modalInstance = bootstrap.Modal.getInstance(modal);
+          if (modalInstance) modalInstance.hide();
+        }
+      }
+      
+      function resetModalForm() {
+        appointmentForm.reset();
+        document.getElementById('appointmentId').value = '';
+        toggleDiagnosisFields('scheduled');
+      }
+      
+      function closeModal() {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+        resetModalForm();
+      }
+      
+      function toggleDiagnosisFields(status) {
+        if (status === 'completed') {
+          diagnosisGroup.style.display = 'block';
+          recomendationsGroup.style.display = 'block';
+          diagnosisGroup.style.backgroundColor = '#f8f9fa';
+          recomendationsGroup.style.backgroundColor = '#f8f9fa';
+          diagnosisGroup.style.padding = '10px';
+          recomendationsGroup.style.padding = '10px';
+          diagnosisGroup.style.borderRadius = '5px';
+          recomendationsGroup.style.borderRadius = '5px';
+          diagnosisGroup.style.border = '1px solid #ddd';
+          recomendationsGroup.style.border = '1px solid #ddd';
+        } else {
+          diagnosisGroup.style.display = 'none';
+          recomendationsGroup.style.display = 'none';
+        }
+      }
+      
+      async function saveAppointment() {
+        const appointmentId = document.getElementById('appointmentId').value;
+        const isNewAppointment = !appointmentId;
+        const status = document.getElementById('status').value;
+        
+        if (status === 'completed') {
+          const diagnosis = document.getElementById('diagnosis').value.trim();
+          
+          if (!diagnosis) {
+            alert('Для завершенного приема необходимо указать диагноз!');
+            document.getElementById('diagnosis').focus();
+            return;
+          }
+        }
+        
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+        saveBtn.disabled = true;
+        
+        const formData = {
+          petid: document.getElementById('petid').value,
+          vetid: document.getElementById('vetid').value,
+          date: document.getElementById('date').value,
+          time: document.getElementById('time').value,
+          type: document.getElementById('type').value,
+          comment: document.getElementById('comment').value,
+          status: status
+        };
+        
+        if (formData.status === 'completed') {
+          formData.diagnosis = document.getElementById('diagnosis').value;
+          formData.recomendations = document.getElementById('recomendations').value;
+        }
+        
+        try {
+          const url = isNewAppointment 
+            ? '/api/appointments' 
+            : `/api/appointments/${appointmentId}`;
+          
+          const method = isNewAppointment ? 'POST' : 'PUT';
+          
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          if (!response.ok) throw new Error('Не удалось сохранить данные приема');
+          
+          const modalInstance = bootstrap.Modal.getInstance(modal);
+          if (modalInstance) modalInstance.hide();
+          
+          setTimeout(() => window.location.reload(), 500);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Произошла ошибка при сохранении данных приема');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Сохранить';
+        }
+      }
+      
+      async function cancelAppointment(appointmentId) {
+        if (!confirm('Вы уверены, что хотите отменить этот прием?')) return;
+        
+        try {
+          const response = await fetch(`/api/appointments/${appointmentId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: 'cancelled' })
+          });
+          
+          if (!response.ok) throw new Error('Не удалось отменить прием');
+          
+          setTimeout(() => window.location.reload(), 500);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Произошла ошибка при отмене приема');
+        }
+      }
+      
+      async function acceptAppointment(appointmentId) {
+        if (!confirm('Вы уверены, что хотите подтвердить этот прием?')) return;
+        
+        try {
+          const response = await fetch(`/api/appointments/${appointmentId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: 'accepted' })
+          });
+          
+          if (!response.ok) throw new Error('Не удалось подтвердить прием');
+          
+          setTimeout(() => window.location.reload(), 500);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Произошла ошибка при подтверждении приема');
+        }
+      }
+      
+      async function completeAppointment(appointmentId) {
+        if (confirm('Хотите добавить диагноз и рекомендации?')) {
+          await showCompletionModal(appointmentId);
+        } else {
+          try {
+            const response = await fetch(`/api/appointments/${appointmentId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ status: 'completed' })
+            });
+            
+            if (!response.ok) throw new Error('Не удалось завершить прием');
+            
+            setTimeout(() => window.location.reload(), 500);
+            
+          } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при завершении приема');
+          }
+        }
+      }
+      
+      async function showCompletionModal(appointmentId) {
+        try {
+          const response = await fetch(`/api/appointments/${appointmentId}`);
+          if (!response.ok) throw new Error('Не удалось загрузить данные приема');
+          
+          const appointment = await response.json();
+          
+          document.getElementById('appointmentId').value = appointment.appointmentid;
+          document.getElementById('petid').value = appointment.petid;
+          document.getElementById('vetid').value = appointment.vetid;
+          
+          if (appointment.date) {
+            const date = new Date(appointment.date);
+            const formattedDate = date.toISOString().split('T')[0];
+            document.getElementById('date').value = formattedDate;
+          }
+          
+          document.getElementById('time').value = appointment.time;
+          document.getElementById('type').value = appointment.type;
+          document.getElementById('comment').value = appointment.comment || '';
+          document.getElementById('status').value = 'completed';
+          
+          toggleDiagnosisFields('completed');
+          
+          document.getElementById('appointmentModalLabel').textContent = 'Завершить прием';
+          
+          const modalInstance = new bootstrap.Modal(modal);
+          modalInstance.show();
+          
+          setTimeout(() => {
+            document.getElementById('diagnosis').focus();
+          }, 500);
+          
+        } catch (error) {
+          console.error('Ошибка:', error);
+          alert('Не удалось открыть форму завершения приема');
+        }
+      }
+    });

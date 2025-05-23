@@ -10,6 +10,7 @@ exports.seed = async function (knex) {
     await knex('email_templates').del();
     await knex('settings').del();
     await knex('users').del();
+    await knex('services').del();
 
     // 2) Хешируем пароли
     const saltRounds = 10;
@@ -30,7 +31,7 @@ exports.seed = async function (knex) {
             email: 'admin@clinic.com',
             phoneNumber: '+71234567890',
             name: 'Администратор',
-            avatar: null
+            avatar: "https://steamuserimages-a.akamaihd.net/ugc/2358265741743006609/9E87FE65DA1E3AD6D31936C601A18FFDA88EF2C1/?imw=512&amp;imh=288&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true"
         },
         {
             userid: 2,
@@ -50,7 +51,7 @@ exports.seed = async function (knex) {
             email: 'ivanov@mail.ru',
             phoneNumber: '+71239876543',
             name: 'Иван Иванов',
-            avatar: null
+            avatar: "https://steamuserimages-a.akamaihd.net/ugc/2358265741743006609/9E87FE65DA1E3AD6D31936C601A18FFDA88EF2C1/?imw=512&amp;imh=288&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true"
         },
         {
             userid: 4,
@@ -60,7 +61,7 @@ exports.seed = async function (knex) {
             email: 'manager@clinic.com',
             phoneNumber: '+70987654321',
             name: 'Менеджер',
-            avatar: null
+            avatar: "https://steamuserimages-a.akamaihd.net/ugc/2358265741743006609/9E87FE65DA1E3AD6D31936C601A18FFDA88EF2C1/?imw=512&amp;imh=288&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true"
         },
         {
             userid: 5,
@@ -70,6 +71,42 @@ exports.seed = async function (knex) {
             email: 'client2@mail.ru',
             phoneNumber: '+71239876543',
             name: 'Клиент 2',
+            avatar: "https://steamuserimages-a.akamaihd.net/ugc/2358265741743006609/9E87FE65DA1E3AD6D31936C601A18FFDA88EF2C1/?imw=512&amp;imh=288&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true"
+        }
+    ]);
+    await knex('users').insert([
+        {
+            userid: 6,
+            username: 'vet',
+            password: vetHash,
+            role: 'Vet',
+            email: 'vet@clinic.com',
+            phoneNumber: '+71239876543',
+            name: 'Ветеринар',
+            avatar: null
+        }
+    ]);
+    await knex('users').insert([
+        {
+            userid: 7,
+            username: 'vet2',
+            password: vetHash,
+            role: 'Vet',
+            email: 'vet2@clinic.com',
+            phoneNumber: '+71239876543',
+            name: 'Ветеринар 2',
+            avatar: null
+        }
+    ]);
+    await knex('users').insert([
+        {
+            userid: 8,
+            username: 'vet3',
+            password: vetHash,
+            role: 'Vet',
+            email: 'vet3@clinic.com',
+            phoneNumber: '+71239876543',
+            name: 'Ветеринар 3',
             avatar: null
         }
     ]);
@@ -207,6 +244,57 @@ exports.seed = async function (knex) {
             type: 'consultation',
             clientId: 3,
             time: '10:00'
+        }
+    ]);
+    // 11) Услуги
+    await knex('services').insert([
+        {
+            id: 1,
+            name: 'Услуга 1',
+            description: 'Услуга 1',
+            price: 1000,
+            image: 'https://i.ytimg.com/vi/e6w-EkLZbiM/maxresdefault.jpg',
+            category: 'other'
+        }
+    ]);
+    await knex('services').insert([
+        {
+            id: 2,
+            name: 'Услуга 2',
+            description: 'Услуга 2',
+            price: 1000,
+            image: 'https://i.ytimg.com/vi/e6w-EkLZbiM/maxresdefault.jpg',
+            category: 'other'
+        }
+    ]);
+    await knex('services').insert([
+        {
+            id: 3,
+            name: 'Услуга 3',
+            description: 'Услуга 3',
+            price: 1000,
+            image: 'https://i.ytimg.com/vi/e6w-EkLZbiM/maxresdefault.jpg',
+            category: 'other'
+        }
+    ]);
+    await knex('services').insert([
+        {
+            id: 4,
+            name: 'Услуга 4',
+            description: 'Услуга 4',
+            price: 1000,
+            image: 'https://i.ytimg.com/vi/e6w-EkLZbiM/maxresdefault.jpg',
+            category: 'other'
+        }
+    ]);
+    await knex('services').insert([
+        {
+            id: 5,
+            name: 'Услуга 5',
+            description: 'Услуга 5',
+            price: 1000,
+            image: 'https://i.ytimg.com/vi/e6w-EkLZbiM/maxresdefault.jpg',
+            category: 'other'
         }
     ]);
 };

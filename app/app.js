@@ -2,52 +2,43 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
-const cors = require('cors');
 const morgan = require('morgan');
-const logger = require('./utils/logger');
+const logger = require('./src/utils/logger');
 
-// Загрузка переменных окружения
 dotenv.config();
 
 const app = express();
 
-// Настройка шаблонизатора
 app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'src/views'));
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src/public')));
 
-// Логирование запросов
 const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
 app.use(morgan(morganFormat, { stream: logger.stream }));
 
-// Получение информации о пользователе
-const fetchUser = require('./middlewares/fetchUser');
+const fetchUser = require('./src/middlewares/fetchUser');
 app.use(fetchUser);
 
 if (process.env.LOG_API_REQUESTS === 'true') {
-    const logApiRequests = require('./middlewares/logApiRequests');
+    const logApiRequests = require('./src/middlewares/logApiRequests');
     app.use(logApiRequests);
 }
 
-// Подключение маршрутов
-app.use('/', require('./routes/index'));
-app.use('/api', require('./routes/api'));
-app.use('/admin', require('./routes/admin'));
-app.use('/auth', require('./routes/auth'));
-app.use('/employee', require('./routes/employee'));
-app.use('/client', require('./routes/client')); // Клиентский интерфейс
+app.use('/', require('./src/routes/index'));
+app.use('/api', require('./src/routes/api'));
+app.use('/admin', require('./src/routes/admin'));
+app.use('/auth', require('./src/routes/auth'));
+app.use('/employee', require('./src/routes/employee'));
+app.use('/client', require('./src/routes/client'));
 
-// Обработка ошибок
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const errorMessage = err.message || 'Внутренняя ошибка сервера';
 
-    // Логирование ошибки
     logger.error(`${statusCode} - ${errorMessage}`, {
         method: req.method,
         url: req.originalUrl,
@@ -56,7 +47,6 @@ app.use((err, req, res, next) => {
         stack: err.stack
     });
 
-    // Если API запрос - вернуть JSON
     if (req.originalUrl.startsWith('/api')) {
         const response = {
             error: errorMessage,
@@ -65,7 +55,6 @@ app.use((err, req, res, next) => {
         return res.status(statusCode).json(response);
     }
 
-    // Для обычных запросов - отобразить страницу с ошибкой
     res.status(statusCode).render('pages/error', {
         title: 'Ошибка',
         message: errorMessage,
@@ -73,7 +62,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Обработка 404
 app.use((req, res) => {
     if (req.originalUrl.startsWith('/api')) {
         return res.status(404).json({ error: 'Маршрут не найден' });

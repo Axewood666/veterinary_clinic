@@ -1,0 +1,257 @@
+extends ../../layouts/admin.pug
+
+block content
+  .vets-page
+    .card.mb-4
+      .card-header
+        h2 Список ветеринаров
+      .card-body
+        if managers && managers.length > 0
+          .table-responsive
+            table.table.table-striped.table-hover
+              thead
+                tr
+                  th ID
+                  th Имя
+                  th Email
+                  th Телефон
+                  th Действия
+              tbody
+                each manager in managers
+                  tr
+                    td= manager.userid
+                    td
+                      if manager.avatar
+                        img.avatar.me-2(src=manager.avatar, alt=manager.name, width="30" height="30" style="border-radius: 50%; object-fit: cover;")
+                      = manager.name || manager.username
+                    td= manager.email
+                    td= manager.phoneNumber || 'Не указан'
+                    td
+                      a.btn.btn-sm.btn-outline-primary.me-2(href=`/admin/managers/${manager.userid}` style="display: none;")
+                        i.bi.bi-eye.me-1
+                        | Детали
+                      button.btn.btn-sm.btn-outline-danger.ban-btn(data-userid=manager.userid data-username=manager.name || manager.username)
+                        i.bi.bi-slash-circle.me-1
+                        | Блокировать
+        else
+          .alert.alert-info Ветеринары не найдены
+
+    if invitations && invitations.length > 0
+      .card
+        .card-header
+          h2.h5.mb-0 Активные приглашения
+        .card-body
+          .table-responsive
+            table.table.table-striped
+              thead
+                tr
+                  th Email
+                  th Дата создания
+                  th Срок действия
+                  th Действия
+              tbody
+                each invite in invitations.filter(i => i.role === 'Manager')
+                  - const expiresDate = new Date(invite.expires_at)
+                  - const isExpiringSoon = (expiresDate - new Date()) < 86400000
+                  tr(class=isExpiringSoon ? 'table-warning' : '')
+                    td= invite.email
+                    td= new Date(invite.created_at).toLocaleString('ru-RU')
+                    td= new Date(invite.expires_at).toLocaleString('ru-RU')
+                    td
+                      button.btn.btn-sm.btn-outline-secondary.copy-invite-btn(data-token=invite.token)
+                        i.bi.bi-clipboard.me-1
+                        | Копировать ссылку
+                      button.btn.btn-sm.btn-outline-danger.ms-2.revoke-invite-btn(data-id=invite.id)
+                        i.bi.bi-x-circle.me-1
+                        | Отозвать
+
+    button#openInviteModal.btn.btn-primary(
+      type="button"
+      data-bs-toggle="modal"
+      data-bs-target="#inviteModal"
+      style="background-color:rgb(135, 187, 247); border-color:rgb(0, 0, 0); padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 20px; display: block; margin-left: auto; margin-right: auto;"
+    ) Пригласить менеджера
+
+    #inviteModal.modal.fade(tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header(style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6")
+            h5#inviteModalLabel.modal-title(style="color: #333") Пригласить менеджера
+            button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+          .modal-body
+            form#inviteForm
+              .mb-3(style="display: flex; flex-direction: column; gap: 10px;")
+                label.form-label(for="inviteEmail" style="font-weight: 500") Email
+                input#inviteEmail.form-control(
+                  type="email" 
+                  name="email" 
+                  required
+                  style="border: 1px solid #ced4da; border-radius: 4px; padding: 8px"
+                  placeholder="Введите email менеджера"
+                )
+                label.form-label(for="inviteName" style="font-weight: 500") Имя
+                input#inviteName.form-control(
+                  type="text" 
+                  name="name" 
+                  placeholder="Введите имя менеджера" 
+                  style="border: 1px solid #ced4da; border-radius: 4px; padding: 8px; margin-top: 10px;"
+                )
+                .form-text(style="color: #6c757d; margin-bottom: 10px;") Приглашение будет отправлено на указанный email
+              input#inviteRole(type="hidden" name="role" value="Manager")
+          .modal-footer(style="border-top: 1px solid #dee2e6")
+            button.btn.btn-secondary(
+              type="button" 
+              data-bs-dismiss="modal"
+              style="background-color: #6c757d; border-color: #6c757d; padding: 8px 16px; margin: 10px 20px 0px 0px; margin-left: auto;"
+            ) Отмена
+            button#sendInviteBtn.btn.btn-primary(
+              type="submit"
+              style="background-color:rgb(135, 187, 247); border-color:rgb(0, 0, 0); padding: 8px 16px; margin-left: 20px;"
+            ) Отправить приглашение
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      const inviteForm = document.getElementById('inviteForm');
+      const inviteModal = document.getElementById('inviteModal');
+      const btnPrimary = document.getElementById('sendInviteBtn');
+      
+      if (!inviteForm || !inviteModal) {
+        console.error('Форма или модальное окно не найдены');
+        return;
+      }
+
+      btnPrimary.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('inviteEmail');
+        const nameInput = document.getElementById('inviteName');
+        const roleInput = document.getElementById('inviteRole');
+        const email = emailInput.value.trim();
+        const name = nameInput.value.trim();
+        const submitBtn = document.getElementById('sendInviteBtn');
+        if (!validateEmail(email)) {
+          emailInput.focus();
+          return;
+        }
+
+        if (!name) {
+          nameInput.focus();
+          return;
+        }
+
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
+
+        try {
+          const formData = {
+            email: email,
+            name: name,
+            role: roleInput.value
+          };
+
+          const response = await fetch('/admin/invite', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+            credentials: 'include'
+          });
+
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || 'Ошибка сервера');
+          }
+          
+          const modal = bootstrap.Modal.getInstance(inviteModal);
+          if (modal) {
+            modal.hide();
+          } else {
+            console.error('Не удалось получить экземпляр модального окна');
+          }
+          
+          inviteForm.reset();
+          
+          setTimeout(() => window.location.reload(), 1500);
+          
+        } catch (error) {
+          console.error('Ошибка при отправке приглашения:', error);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Отправить приглашение';
+        }
+      });
+
+      function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+    });
+
+      document.querySelectorAll('.copy-invite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const token = this.getAttribute('data-token');
+          const inviteUrl = `${window.location.origin}/auth/register/invite/${token}`;
+          
+          navigator.clipboard.writeText(inviteUrl)
+            .then(() => {
+            })
+            .catch(err => {
+              console.error('Ошибка при копировании:', err);
+            });
+        });
+      });
+
+      document.querySelectorAll('.revoke-invite-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          if (!confirm('Вы уверены, что хотите отозвать это приглашение?')) {
+            return;
+          }
+
+          const inviteId = this.getAttribute('data-id');
+          try {
+            const response = await fetch(`/admin/invite/${inviteId}`, {
+              method: 'DELETE'
+            });
+
+            if (response.ok) {
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              const data = await response.json();
+            }
+          } catch (error) {
+            console.error('Ошибка при отзыве приглашения:', error);
+          }
+        });
+      });
+
+      document.querySelectorAll('.ban-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const userId = this.getAttribute('data-userid');
+          const username = this.getAttribute('data-username');
+          
+          if (!confirm(`Вы уверены, что хотите заблокировать ветеринара ${username}?`)) {
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/users/${userId}/ban`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                reason: 'Заблокирован администратором'
+              })
+            });
+
+            if (response.ok) {
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              const data = await response.json();
+            }
+          } catch (error) {
+            console.error('Ошибка при блокировке ветеринара:', error);
+          }
+        });
+      });

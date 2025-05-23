@@ -1,0 +1,219 @@
+extends ../../layouts/client.pug
+
+block content
+  .d-flex.align-items-center.mb-4
+    a.btn.btn-sm.btn-outline-secondary.me-3(href=`/client/pets/${pet.petid}`)
+      i.bi.bi-arrow-left
+      |  Назад к питомцу
+    h1.page-title.m-0 История приемов: #{pet.name}
+  
+  .row.mb-4
+    .col-md-4
+      .card
+        .card-body
+          h3.card-title Информация о питомце
+          .pet-details
+            .detail-item
+              .detail-label Вид:
+              .detail-value
+                if pet.type === 'dog'
+                  | Собака
+                else if pet.type === 'cat'
+                  | Кошка
+                else if pet.type === 'bird'
+                  | Птица
+                else if pet.type === 'fish'
+                  | Рыба
+                else
+                  | Другое
+            .detail-item
+              .detail-label Порода:
+              .detail-value= pet.breed
+            .detail-item
+              .detail-label Возраст:
+              .detail-value= pet.age + ' ' + (pet.age === 1 ? 'год' : pet.age > 1 && pet.age < 5 ? 'года' : 'лет')
+            
+          a.btn.btn-success.btn-sm.mt-3(href=`/appointment?petid=${pet.petid}`)
+            i.bi.bi-calendar-plus.me-1
+            | Записать на прием
+  
+  .card
+    .card-header
+      h2 История приемов
+    .card-body
+      if appointments && appointments.length > 0
+        .timeline
+          each appointment in appointments
+            - var itemClass = 'scheduled';
+            - if (appointment.status === 'completed') itemClass = 'completed'
+            - else if (appointment.status === 'cancelled') itemClass = 'cancelled'
+            - else if (appointment.status === 'accepted') itemClass = 'accepted'
+            .timeline-item(class=itemClass)
+              .timeline-date
+                .date= new Date(appointment.date).toLocaleDateString('ru-RU')
+                .time= appointment.time
+                
+              .timeline-content
+                .d-flex.justify-content-between.align-items-center.mb-2
+                  h4.appointment-type
+                    if appointment.type === 'consultation'
+                      | Консультация
+                    else if appointment.type === 'vaccination'
+                      | Вакцинация
+                    else
+                      | Другое
+                  - var badgeClass = 'bg-warning';
+                  - if (appointment.status === 'completed') badgeClass = 'bg-success'
+                  - else if (appointment.status === 'cancelled') badgeClass = 'bg-danger'
+                  - else if (appointment.status === 'accepted') badgeClass = 'bg-primary'
+                  span.badge(class=badgeClass)
+                    if appointment.status === 'completed'
+                      | Завершен
+                    else if appointment.status === 'cancelled'
+                      | Отменен
+                    else if appointment.status === 'accepted'
+                      | Подтвержден
+                    else
+                      | Запланирован
+                
+                .appointment-details
+                  p
+                    strong Ветеринар: 
+                    span= appointment.vet_name
+                  
+                  if appointment.comment
+                    p
+                      strong Причина обращения: 
+                      span= appointment.comment
+                  
+                  if appointment.diagnosis
+                    p
+                      strong Диагноз: 
+                      span= appointment.diagnosis
+                  
+                  if appointment.recomendations
+                    p
+                      strong Рекомендации: 
+                      span= appointment.recomendations
+                
+                .appointment-actions.mt-2
+                  a.btn.btn-info.btn-sm(href=`/client/appointments/${appointment.appointmentid}`) Подробнее
+                  
+                  if appointment.status === 'scheduled' || appointment.status === 'accepted'
+                    button.btn.btn-danger.btn-sm.cancel-appointment.ms-2(data-id=appointment.appointmentid) Отменить
+      else
+        .alert.alert-info
+          p У питомца #{pet.name} пока нет истории приемов
+          a.btn.btn-primary.mt-2(href=`/client/appointment?petid=${pet.petid}`) Записать на прием
+
+block styles
+  style.
+    .pet-details {
+      padding: 0.5rem 0;
+    }
+    
+    .detail-item {
+      display: flex;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .detail-label {
+      font-weight: bold;
+      min-width: 70px;
+    }
+    
+    .timeline {
+      position: relative;
+      padding: 1rem 0;
+    }
+    
+    .timeline:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 120px;
+      height: 100%;
+      width: 2px;
+      background: #e9ecef;
+    }
+    
+    .timeline-item {
+      display: flex;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .timeline-date {
+      width: 120px;
+      text-align: right;
+      padding-right: 20px;
+      flex-shrink: 0;
+    }
+    
+    .timeline-date .date {
+      font-weight: bold;
+    }
+    
+    .timeline-content {
+      background: #f8f9fa;
+      border-radius: 5px;
+      padding: 1rem;
+      flex-grow: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-left: 20px;
+    }
+    
+    .timeline-item:before {
+      content: '';
+      position: absolute;
+      left: 120px;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #6c757d;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+    
+    .timeline-item.completed:before {
+      background: #28a745;
+    }
+    
+    .timeline-item.cancelled:before {
+      background: #dc3545;
+    }
+    
+    .timeline-item.accepted:before {
+      background: #007bff;
+    }
+    
+    .timeline-item.scheduled:before {
+      background: #ffc107;
+    }
+
+block scripts
+  script.
+    // Обработка отмены приема
+    document.addEventListener('DOMContentLoaded', function() {
+      const cancelButtons = document.querySelectorAll('.cancel-appointment');
+      
+      cancelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const appointmentId = this.getAttribute('data-id');
+          if (confirm('Вы уверены, что хотите отменить этот прием?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/client/appointments/${appointmentId}/cancel`;
+            document.body.appendChild(form);
+            form.submit();
+          }
+        });
+      });
+    });

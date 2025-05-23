@@ -1,0 +1,17 @@
+extends ../layouts/main.pug
+
+block content
+  section.vets-section
+    .container
+      h2.section-title Наши ветеринары
+      .vets-slider
+        each vet in vets
+              .vet-card
+                .vet-image
+                  if vet.avatar
+                    img(src=vet.avatar alt=vet.name)
+                  else
+                    img(src='https://i.ytimg.com/vi/458ApUxcOpM/maxresdefault.jpg' alt=vet.name)
+                .vet-info
+                  h3.vet-name= vet.name
+                  p.vet-specialty= vet.specialization || 'Ветеринарный врач'
