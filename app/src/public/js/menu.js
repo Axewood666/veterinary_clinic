@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
 document.addEventListener('DOMContentLoaded', function () {
     const signinButton = document.getElementById('signin-button');
     if (signinButton) {
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
 document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {

@@ -4,6 +4,9 @@ block content
   .clients-page
     .page-header
       h1 Clients Management
+      .search-container
+        label(for="searchInput") Поиск клиентов:
+        input#searchInput(type="text" placeholder="Поиск по имени, username, email...")
 
     if clients.length > 0
       .clients-container
@@ -15,9 +18,10 @@ block content
                 th Username
                 th Email
                 th Name
+                th Действия
             tbody
               each client in clients
-                tr(data-clientid=client.userid)
+                tr(data-clientid=client.userid data-name=client.name data-username=client.username data-email=client.email)
                   td= client.userid
                   td= client.username
                   td= client.email
@@ -61,8 +65,22 @@ block content
 block scripts
   script.
     const BACKEND_URL = '!{backEndUrl}';
+    let allClients = [];
     
     document.addEventListener('DOMContentLoaded', function() {
+      // Сохраняем всех клиентов для поиска
+      const rows = document.querySelectorAll('.clients-table tbody tr');
+      allClients = Array.from(rows).map(row => ({
+        element: row,
+        clientid: row.getAttribute('data-clientid'),
+        name: row.getAttribute('data-name') || '',
+        username: row.getAttribute('data-username') || '',
+        email: row.getAttribute('data-email') || ''
+      }));
+
+      // Обработчик события для поиска
+      document.getElementById('searchInput')?.addEventListener('input', applySearch);
+
       document.getElementById('addClientBtn')?.addEventListener('click', showAddClientModal);
 
       document.querySelector('.clients-list')?.addEventListener('click', function(e) {
@@ -79,6 +97,43 @@ block scripts
       document.querySelector('.close-btn')?.addEventListener('click', function() {
         document.getElementById('clientDetails')?.classList.remove('active');
       });
+
+      function applySearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        let filteredClients = allClients.filter(client => {
+          // Поиск по имени, username, email
+          const matchesSearch = !searchTerm || 
+            client.name.toLowerCase().includes(searchTerm) ||
+            client.username.toLowerCase().includes(searchTerm) ||
+            client.email.toLowerCase().includes(searchTerm);
+
+          return matchesSearch;
+        });
+
+        // Показываем/скрываем строки
+        allClients.forEach(client => {
+          const shouldShow = filteredClients.includes(client);
+          client.element.style.display = shouldShow ? '' : 'none';
+        });
+
+        // Показываем сообщение если ничего не найдено
+        const tbody = document.querySelector('.clients-table tbody');
+        const noResultsRow = tbody.querySelector('.no-results-row');
+        
+        if (filteredClients.length === 0) {
+          if (!noResultsRow) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.className = 'no-results-row';
+            emptyRow.innerHTML = '<td colspan="5" style="text-align: center; padding: 20px; color: #666;">Клиенты не найдены</td>';
+            tbody.appendChild(emptyRow);
+          }
+        } else {
+          if (noResultsRow) {
+            noResultsRow.remove();
+          }
+        }
+      }
 
       function showAddClientModal(e) {
         e.preventDefault();

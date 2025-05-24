@@ -1,7 +1,7 @@
 .hero-section {
     text-align: center;
     padding: 5rem 1rem;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://cdn.discordapp.com/attachments/954467468225699860/1241172820860600330/d2450614-95af-482a-957c-a6a031f221b5.gif?ex=6831af84&is=68305e04&hm=fd9b2373bf86f87433f25661a170448d77bfe519ccbef6ccc60d42016d6ed403&');
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/images/animation.gif');
     background-position: center;
     background-size: contain;
     margin-bottom: 0;

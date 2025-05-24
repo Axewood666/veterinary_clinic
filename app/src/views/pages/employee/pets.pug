@@ -8,6 +8,9 @@ block content
 
     .filters
       .filter-group
+        label(for="searchInput") Поиск:
+        input#searchInput(type="text" placeholder="Поиск по имени, породе, владельцу...")
+      .filter-group
         label(for="typeFilter") Тип:
         select#typeFilter
           option(value="") Все типы
@@ -37,7 +40,7 @@ block content
               th Действия
           tbody
             each pet in pets
-              tr(data-petid=pet.petid)
+              tr(data-petid=pet.petid data-name=pet.name data-breed=pet.breed data-owner=pet.ownerName data-type=pet.type)
                 td= pet.petid
                 td= pet.name
                 td= pet.type
@@ -92,11 +95,24 @@ block content
 block scripts
   script.
     const BACKEND_URL = '!{backEndUrl}';
+    let allPets = [];
     
     document.addEventListener('DOMContentLoaded', function() {
-      // Обработчики событий для фильтров
-      document.getElementById('typeFilter')?.addEventListener('change', applyFilters);
-      document.getElementById('ownerFilter')?.addEventListener('change', applyFilters);
+      // Сохраняем все питомцы для поиска
+      const rows = document.querySelectorAll('.pets-table tbody tr');
+      allPets = Array.from(rows).map(row => ({
+        element: row,
+        petid: row.getAttribute('data-petid'),
+        name: row.getAttribute('data-name') || '',
+        breed: row.getAttribute('data-breed') || '',
+        owner: row.getAttribute('data-owner') || '',
+        type: row.getAttribute('data-type') || ''
+      }));
+
+      // Обработчики событий для поиска и фильтров
+      document.getElementById('searchInput')?.addEventListener('input', applyFiltersAndSearch);
+      document.getElementById('typeFilter')?.addEventListener('change', applyFiltersAndSearch);
+      document.getElementById('ownerFilter')?.addEventListener('change', applyFiltersAndSearch);
 
       // Обработчики событий для кнопок
       document.getElementById('addPetBtn')?.addEventListener('click', showAddPetModal);
@@ -119,6 +135,52 @@ block scripts
       document.querySelector('.close-btn')?.addEventListener('click', function() {
         document.getElementById('petDetails')?.classList.remove('active');
       });
+
+      function applyFiltersAndSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const typeFilter = document.getElementById('typeFilter').value;
+        const ownerFilter = document.getElementById('ownerFilter').value;
+
+        let filteredPets = allPets.filter(pet => {
+          // Поиск по тексту
+          const matchesSearch = !searchTerm || 
+            pet.name.toLowerCase().includes(searchTerm) ||
+            pet.breed.toLowerCase().includes(searchTerm) ||
+            pet.owner.toLowerCase().includes(searchTerm);
+
+          // Фильтр по типу
+          const matchesType = !typeFilter || pet.type === typeFilter;
+
+          // Фильтр по владельцу
+          const matchesOwner = !ownerFilter || pet.element.querySelector('td:nth-child(7)').textContent === 
+            document.querySelector(`#ownerFilter option[value="${ownerFilter}"]`).textContent;
+
+          return matchesSearch && matchesType && matchesOwner;
+        });
+
+        // Показываем/скрываем строки
+        allPets.forEach(pet => {
+          const shouldShow = filteredPets.includes(pet);
+          pet.element.style.display = shouldShow ? '' : 'none';
+        });
+
+        // Показываем сообщение если ничего не найдено
+        const tbody = document.querySelector('.pets-table tbody');
+        const noResultsRow = tbody.querySelector('.no-results-row');
+        
+        if (filteredPets.length === 0) {
+          if (!noResultsRow) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.className = 'no-results-row';
+            emptyRow.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px; color: #666;">Питомцы не найдены</td>';
+            tbody.appendChild(emptyRow);
+          }
+        } else {
+          if (noResultsRow) {
+            noResultsRow.remove();
+          }
+        }
+      }
 
       async function applyFilters() {
         const type = document.getElementById('typeFilter').value;
@@ -144,7 +206,7 @@ block scripts
         const tbody = document.querySelector('.pets-table tbody');
         if (pets.length > 0) {
           tbody.innerHTML = pets.map(pet => `
-            <tr data-petid="${pet.petid}">
+            <tr data-petid="${pet.petid}" data-name="${pet.name}" data-breed="${pet.breed || ''}" data-owner="${pet.ownerName || ''}" data-type="${pet.type}">
               <td>${pet.petid}</td>
               <td>${pet.name}</td>
               <td>${pet.type}</td>
@@ -159,8 +221,20 @@ block scripts
               </td>
             </tr>
           `).join('');
+          
+          // Обновляем массив allPets после изменения
+          const rows = document.querySelectorAll('.pets-table tbody tr');
+          allPets = Array.from(rows).map(row => ({
+            element: row,
+            petid: row.getAttribute('data-petid'),
+            name: row.getAttribute('data-name') || '',
+            breed: row.getAttribute('data-breed') || '',
+            owner: row.getAttribute('data-owner') || '',
+            type: row.getAttribute('data-type') || ''
+          }));
         } else {
           tbody.innerHTML = '<tr><td colspan="8">Питомцы не найдены</td></tr>';
+          allPets = [];
         }
       }
 

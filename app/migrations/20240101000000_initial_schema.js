@@ -1,9 +1,5 @@
-/**
- * Инициализация схемы базы данных ветеринарной клиники
- */
 exports.up = function (knex) {
     return knex.schema
-        // Таблица пользователей
         .createTable('users', table => {
             table.increments('userid').primary();
             table.string('username').notNullable().unique();
@@ -13,8 +9,6 @@ exports.up = function (knex) {
             table.string('phoneNumber');
             table.string('name');
         })
-
-        // Таблица питомцев
         .createTable('pets', table => {
             table.increments('petid').primary();
             table.integer('userid').unsigned().notNullable().references('userid').inTable('users');
@@ -25,8 +19,6 @@ exports.up = function (knex) {
             table.enum('type', ['dog', 'cat', 'bird', 'fish', 'other']).notNullable();
             table.enum('gender', ['male', 'female']).notNullable();
         })
-
-        // Таблица приемов
         .createTable('appointments', table => {
             table.increments('appointmentid').primary();
             table.integer('petid').unsigned().notNullable().references('petid').inTable('pets');
@@ -40,18 +32,14 @@ exports.up = function (knex) {
             table.integer('clientId').unsigned().references('userid').inTable('users');
             table.string('time').notNullable();
         })
-
-        // Таблица расписания ветеринаров
         .createTable('vet_schedules', table => {
             table.increments('id').primary();
             table.integer('vetid').unsigned().references('userid').inTable('users');
-            table.enum('day', ['1', '2', '3', '4', '5', '6', '7']); // 1 - Monday, 2 - Tuesday, 3 - Wednesday, 4 - Thursday, 5 - Friday, 6 - Saturday, 7 - Sunday
+            table.enum('day', ['1', '2', '3', '4', '5', '6', '7']); 
             table.time('start_time');
             table.time('end_time');
             table.boolean('is_active').defaultTo(true);
         })
-
-        // Таблица пригласительных токенов
         .createTable('invitation_tokens', table => {
             table.increments('id').primary();
             table.string('token').notNullable().unique();
@@ -61,16 +49,12 @@ exports.up = function (knex) {
             table.timestamp('expires_at').notNullable();
             table.timestamp('created_at').defaultTo(knex.fn.now());
         })
-
-        // Таблица шаблонов электронных писем
         .createTable('email_templates', table => {
             table.increments('id').primary();
             table.string('name').unique().notNullable();
             table.string('subject').notNullable();
             table.text('body').notNullable();
         })
-
-        // Таблица бана пользователей
         .createTable('user_bans', table => {
             table.increments('id').primary();
             table.integer('userid').unsigned().notNullable()
@@ -81,8 +65,6 @@ exports.up = function (knex) {
             table.integer('banned_by').unsigned()
                 .references('userid').inTable('users');
         })
-
-        // Таблица настроек
         .createTable('settings', table => {
             table.increments('id').primary();
             table.string('clinic_name').notNullable().defaultTo('Ветеринарная клиника');
@@ -96,7 +78,6 @@ exports.up = function (knex) {
             table.timestamps(true, true);
         });
 };
-
 exports.down = function (knex) {
     return knex.schema
         .dropTableIfExists('settings')

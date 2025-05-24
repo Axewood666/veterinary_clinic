@@ -491,11 +491,57 @@ button:hover {
 }
 
 .filter-group select,
-.filter-group input {
-    padding: 8px;
-    border: 1px solid #ced4da;
+.filter-group input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #d1d3e2;
     border-radius: 4px;
     font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.2);
+}
+
+/* Стили для search-container на странице клиентов */
+.search-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.search-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #5a5c69;
+    font-size: 14px;
+}
+
+.search-container input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    border: 1px solid #d1d3e2;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.search-container input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+.search-container input[type="text"]::placeholder {
+    color: #858796;
+    font-style: italic;
 }
 
 /* Стили для деталей клиента */

@@ -1,9 +1,4 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 exports.up = function (knex) {
-    //  select "id", "name", "description", "price", "image", "category" from "services" order by "category" asc, "name" asc - relation "services" does not exist
     return knex.schema.createTable('services', function (table) {
         table.increments('id').primary();
         table.string('name').notNullable();
@@ -14,11 +9,6 @@ exports.up = function (knex) {
         table.timestamps(true, true);
     });
 };
-
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 exports.down = function (knex) {
     return knex.schema.dropTable('services');
 };

@@ -1,11 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('loginForm');
     const errorElem = document.getElementById('loginError');
-
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
         errorElem.textContent = '';
-
         const formData = new FormData(form);
         const data = {
             username: formData.get('username'),
@@ -18,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 credentials: 'include',
                 body: JSON.stringify(data)
             });
-
             if (response.ok) {
                 window.location.href = '/';
             } else {
