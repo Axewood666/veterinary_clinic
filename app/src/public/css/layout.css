@@ -256,6 +256,11 @@ button.signin:hover {
     .button {
         width: 100%;
     }
+
+    .social-link {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -291,8 +296,34 @@ button.signin:hover {
         grid-template-columns: 1fr;
         text-align: center;
     }
+}
 
-    .social-link {
-        margin: 0 0.5rem;
-    }
+/* jQuery Animation Styles */
+.fade-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.service-card,
+.vet-card,
+.testimonial-card {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.button {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.error {
+    border: 2px solid #e74c3c !important;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.3);
+}
+
+.error:focus {
+    outline: none;
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
 }
