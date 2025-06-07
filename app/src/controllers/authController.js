@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
         if (activeBan) {
             return res.status(403).json({ message: `You was banned. Reason: ${activeBan.reason}` });
         }
-        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+        const token = jwt.sign({ username: user.username, role: user.role, userid: user.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME || '12h' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -87,7 +87,7 @@ exports.register = async (req, res) => {
             password: hashedPassword,
             role: 'Client'
         }).returning('*');
-        const token = jwt.sign({ username: created.username, role: created.role, userid: created.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+        const token = jwt.sign({ username: created.username, role: created.role, userid: created.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME || '12h' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -232,7 +232,7 @@ exports.registerByInvite = async (req, res) => {
             throw new Error('Failed to register. Please try again later.');
         }
         await db.raw('UPDATE invitation_tokens SET used = true WHERE token = ?', [token]);
-        const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME });
+        const JWTtoken = jwt.sign({ username: newUser.username, role: newUser.role, userid: newUser.userid }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRE_TIME || '12h' });
         res.cookie('token', JWTtoken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
